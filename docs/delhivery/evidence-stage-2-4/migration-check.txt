@@ -1,0 +1,11 @@
+NOTICE:  database "ecom_mig_check24" does not exist, skipping
+applied AddShipmentTracking.sql rc=0
+applied AddFulfilment.reviewed.sql rc=0
+20261109110435_AddFulfilment
+20261109091756_AddShipmentTracking
+20260822214253_AddGuestInfoToCart
+0
+4
+NextNotifyAt
+NotifyFailures
+ReconcileAttempts

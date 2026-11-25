@@ -1,0 +1,69 @@
+{
+  "ShipmentData": [
+    {
+      "Shipment": {
+        "AWB": "84925410100041",
+        "CODAmount": 0,
+        "ChargedWeight": null,
+        "Consignee": {
+          "Address1": [],
+          "Address2": [],
+          "Address3": "",
+          "City": "Gurugram",
+          "Country": "India",
+          "Name": "Test Consignee",
+          "PinCode": 110042,
+          "State": "",
+          "Telephone1": "",
+          "Telephone2": ""
+        },
+        "DeliveryDate": null,
+        "DestRecieveDate": null,
+        "Destination": "Gurugram",
+        "DispatchCount": 0,
+        "Ewaybill": [],
+        "ExpectedDeliveryDate": null,
+        "Extras": "",
+        "FirstAttemptDate": null,
+        "InvoiceAmount": 0,
+        "OrderType": "Pre-paid",
+        "Origin": "Kurukshetra_DC (Haryana)",
+        "OriginRecieveDate": null,
+        "OutDestinationDate": null,
+        "PickUpDate": "2026-11-09T16:08:14.537",
+        "PickedupDate": null,
+        "PickupLocation": "GANPATIHERBAL SURFACE",
+        "PromisedDeliveryDate": null,
+        "Quantity": "",
+        "RTOStartedDate": null,
+        "ReferenceNo": "TEST-STG-0001",
+        "ReturnPromisedDeliveryDate": null,
+        "ReturnedDate": null,
+        "ReverseInTransit": false,
+        "Scans": [
+          {
+            "ScanDetail": {
+              "Instructions": "Manifest uploaded",
+              "Scan": "Manifested",
+              "ScanDateTime": "2026-11-09T16:08:14.553",
+              "ScanType": "UD",
+              "ScannedLocation": "Kurukshetra_DC (Haryana)",
+              "StatusCode": "X-UCI",
+              "StatusDateTime": "2026-11-09T16:08:14.553"
+            }
+          }
+        ],
+        "SenderName": "b0-GANPATIHERBALAYURVED-do-cdp",
+        "Status": {
+          "Instructions": "Manifest uploaded",
+          "RecievedBy": "",
+          "Status": "Manifested",
+          "StatusCode": "X-UCI",
+          "StatusDateTime": "2026-11-09T16:08:14.553",
+          "StatusLocation": "Kurukshetra_DC (Haryana)",
+          "StatusType": "UD"
+        }
+      }
+    }
+  ]
+}

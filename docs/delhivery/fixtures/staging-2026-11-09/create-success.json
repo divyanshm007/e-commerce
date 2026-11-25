@@ -1,0 +1,27 @@
+{
+  "cash_pickups": 0,
+  "cash_pickups_count": 0,
+  "cod_amount": 0,
+  "cod_count": 0,
+  "package_count": 1,
+  "packages": [
+    {
+      "client": "b0-GANPATIHERBALAYURVED-do-cdp",
+      "cod_amount": 0,
+      "payment": "Pre-paid",
+      "refnum": "TEST-STG-0001",
+      "remarks": [
+        ""
+      ],
+      "serviceable": true,
+      "sort_code": "342",
+      "status": "Success",
+      "waybill": "84925410100041"
+    }
+  ],
+  "pickups_count": 0,
+  "prepaid_count": 1,
+  "replacement_count": 0,
+  "success": true,
+  "upload_wbn": "UPL13298097350665324114"
+}

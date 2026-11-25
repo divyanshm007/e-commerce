@@ -1,0 +1,491 @@
+// ═══════════════════════════════════════════════════════════
+//  Admin Design System — shared styles for ALL admin pages
+//  Imported once in styles.scss, applies automatically.
+// ═══════════════════════════════════════════════════════════
+
+// ── Dialog buttons — global color fix ────────────────────
+// X close button: always red, not just on hover
+[class*="-dlg-x"] {
+  color: #DC2626 !important;
+  border-color: #FECACA !important;
+  background: #FFF5F5 !important;
+}
+[class*="-dlg-x"]:hover:not(:disabled) {
+  background: #FEE2E2 !important;
+  color: #B91C1C !important;
+  border-color: #FCA5A5 !important;
+}
+
+// Cancel button: red like the X button
+[class*="-dlg-cancel"] {
+  color: #DC2626 !important;
+  border-color: #FECACA !important;
+  background: #FFF5F5 !important;
+}
+[class*="-dlg-cancel"]:hover:not(:disabled) {
+  background: #FEE2E2 !important;
+  border-color: #FCA5A5 !important;
+  color: #B91C1C !important;
+}
+
+// Hide PrimeNG's own close button — we use custom .xx-dlg-x buttons
+.p-dialog-close-button, .p-dialog-header-close { display: none !important; }
+
+// ── Toast — responsive fix ────────────────────────────────
+@media (max-width: 480px) {
+  .p-toast {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: 12px !important;
+  }
+  .p-toast-message { width: 100% !important; }
+}
+
+// ── Page shell ───────────────────────────────────────────
+.admin-wrapper {
+  flex-direction: column !important;
+  background: #F6F8FA;
+  min-height: 100vh;
+}
+
+// ── Page header (legacy dark gradient header) ─────────────
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0F172A;
+  padding: 18px 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+
+  > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 3px;
+    letter-spacing: -.3px;
+  }
+
+  .subtitle, p.subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,.5);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .header-actions,
+  .header-chips,
+  .header-text { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+}
+
+// ── Stat cards ────────────────────────────────────────────
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+  padding: 20px 28px 0;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04);
+  border: 1px solid #E5E7EB;
+  transition: box-shadow .2s, transform .2s;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+
+  &:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0F766E, #14B8A6);
+  }
+
+  .stat-icon {
+    font-size: 26px !important; width: 26px !important; height: 26px !important;
+    &.paid, &.total-paid, &.active, &.green { color: #0F766E; }
+    &.pending, &.warning, &.orange          { color: #D97706; }
+    &.failed, &.error, &.red, &.danger      { color: #DC2626; }
+    &.info, &.total, &.blue                 { color: #2563EB; }
+    &.purple                                { color: #7C3AED; }
+  }
+
+  p { margin: 0; }
+
+  .stat-val {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -.5px;
+    line-height: 1.1;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: #9CA3AF;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-top: 3px;
+  }
+}
+
+// ── Admin cards ───────────────────────────────────────────
+.admin-wrapper .card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04);
+  border: 1px solid #E5E7EB;
+  transition: box-shadow .2s;
+  &:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+}
+
+.admin-wrapper .data-table-card,
+.admin-wrapper .table-card { margin: 20px 28px 28px; }
+
+.admin-wrapper .filters,
+.admin-wrapper .filter-card { margin: 20px 28px 0; padding: 16px 20px; }
+
+// ── Table toolbar ─────────────────────────────────────────
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 0;
+  flex-wrap: wrap;
+
+  .search-field { flex: 1; min-width: 220px; }
+  .filter-field { width: 180px; min-width: 140px; }
+  .type-filter  { width: 160px; }
+}
+
+// ── Section titles inside cards ───────────────────────────
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #F3F4F6;
+  margin: 0;
+
+  i.pi {
+    font-size: 16px !important;
+    color: #0F766E;
+  }
+}
+
+// ── Loading states ────────────────────────────────────────
+.loading-wrap, .loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  padding: 60px 20px;
+  color: #9CA3AF;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+// ── Status chips ──────────────────────────────────────────
+.admin-wrapper .chip {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 100px;
+  letter-spacing: .3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chip-pending    { background: #FEF9C3; color: #A16207;  border: 1px solid #FDE68A; }
+.chip-confirmed  { background: #CCFBF1; color: #0F766E;  border: 1px solid #99F6E4; }
+.chip-shipped    { background: #DBEAFE; color: #1D4ED8;  border: 1px solid #93C5FD; }
+.chip-delivered  { background: #F0FDFA; color: #0F766E;  border: 1px solid #5EEAD4; }
+.chip-cancelled  { background: #FEF2F2; color: #DC2626;  border: 1px solid #FCA5A5; }
+.chip-returned   { background: #F3E8FF; color: #7C3AED;  border: 1px solid #D8B4FE; }
+.chip-paid       { background: #CCFBF1; color: #0F766E;  border: 1px solid #99F6E4; }
+.chip-failed     { background: #FEF2F2; color: #DC2626;  border: 1px solid #FCA5A5; }
+.chip-refunded   { background: #F3E8FF; color: #7C3AED;  border: 1px solid #D8B4FE; }
+.chip-cod        { background: #FFF7ED; color: #C2410C;  border: 1px solid #FDBA74; }
+.chip-active     { background: #CCFBF1; color: #0F766E;  border: 1px solid #99F6E4; }
+.chip-inactive   { background: #F1F5F9; color: #64748B;  border: 1px solid #CBD5E1; }
+.chip-approved   { background: #CCFBF1; color: #0F766E;  border: 1px solid #99F6E4; }
+.chip-rejected   { background: #FEF2F2; color: #DC2626;  border: 1px solid #FCA5A5; }
+
+.status-chip {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .3px;
+  &.s-pending   { background: #FEF9C3; color: #A16207; border: 1px solid #FDE68A; }
+  &.s-approved  { background: #CCFBF1; color: #0F766E; border: 1px solid #99F6E4; }
+  &.s-rejected  { background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; }
+  &.s-completed { background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD; }
+}
+
+// ── Plain HTML tables (returns page etc.) ────────────────
+.admin-wrapper .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th {
+    background: #F8FAFC;
+    color: #6B7280;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #E5E7EB;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 13px 16px;
+    border-bottom: 1px solid #F3F4F6;
+    color: #374151;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FAFAFA; }
+}
+
+// ── Inline form cards (banners / faqs / etc.) ────────────
+.admin-wrapper .form-card {
+  margin: 20px 28px 0;
+  padding: 22px 24px;
+  border-radius: 12px;
+  max-width: none;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  .form-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #F3F4F6;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.form-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+// ── Settings tab content ──────────────────────────────────
+.tab-content { padding: 20px 28px 28px; }
+
+.admin-wrapper .settings-card {
+  padding: 24px;
+  border-radius: 12px;
+}
+
+// ── Empty state ───────────────────────────────────────────
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 20px; gap: 10px;
+
+  i.pi { font-size: 48px !important; opacity: .2; color: #0F766E; }
+  p { font-size: 15px; font-weight: 700; color: #374151; margin: 0; }
+  small { font-size: 13px; color: #9CA3AF; }
+}
+
+// ── Reason cell (returns) ────────────────────────────────
+.reason-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+// ── Responsive ───────────────────────────────────────────
+@media (max-width: 768px) {
+  .page-header { padding: 14px 16px; }
+  .stats-row { padding: 14px 16px 0; grid-template-columns: 1fr 1fr; }
+
+  .admin-wrapper .data-table-card,
+  .admin-wrapper .table-card { margin: 14px 16px 16px; }
+
+  .admin-wrapper .filters,
+  .admin-wrapper .filter-card,
+  .admin-wrapper .form-card { margin: 14px 16px 0; }
+
+  .table-toolbar {
+    padding: 12px 16px 0;
+    .search-field { min-width: 0; }
+    .filter-field { width: 130px; min-width: 0; }
+  }
+  .tab-content { padding: 14px 16px 16px; }
+
+  // Make all data tables scroll horizontally on small screens
+  .admin-wrapper .data-table-card,
+  .admin-wrapper .table-card {
+    overflow-x: auto;
+  }
+  .admin-wrapper .data-table {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header { padding: 12px 14px; gap: 10px;
+    h1 { font-size: 17px; }
+    .subtitle { font-size: 12px; }
+  }
+  .stats-row { grid-template-columns: 1fr; padding: 12px 14px 0; gap: 10px; }
+
+  .admin-wrapper .data-table-card,
+  .admin-wrapper .table-card { margin: 12px 14px 14px; }
+
+  .admin-wrapper .filters,
+  .admin-wrapper .filter-card,
+  .admin-wrapper .form-card { margin: 12px 14px 0; }
+
+  .table-toolbar { padding: 10px 14px 0; gap: 8px; flex-direction: column; align-items: stretch;
+    .search-field, .filter-field, .type-filter { width: 100%; }
+  }
+
+  .form-row { grid-template-columns: 1fr; }
+}
+
+// ── Global PrimeNG DataTable overrides ───────────────────────
+// Beats component ::ng-deep specificity (0,3,2) because !important
+// ignores specificity. Every admin page inherits these automatically.
+.p-datatable-sm .p-datatable-thead > tr > th {
+  background: #F8FAFC !important;
+  color: #6B7280 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 0.75rem 1rem !important;
+  white-space: nowrap;
+  border-bottom: 1px solid #F3F4F6 !important;
+}
+
+.p-datatable-sm .p-datatable-tbody > tr > td {
+  padding: 0.875rem 1rem !important;
+  border-bottom: 1px solid #F3F4F6 !important;
+  vertical-align: middle !important;
+  color: #374151;
+}
+
+.p-datatable-sm .p-datatable-tbody > tr:hover > td {
+  background: #F9FAFB !important;
+}
+
+.p-datatable-caption {
+  padding: 0.875rem 1.25rem !important;
+  background: #fff !important;
+  border-bottom: 1px solid #F3F4F6 !important;
+}
+
+.p-paginator {
+  padding: 0.625rem 1.25rem !important;
+  background: #fff !important;
+  border-top: 1px solid #F3F4F6 !important;
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+// ── PrimeNG table horizontal scroll on mobile ────────────
+@media (max-width: 768px) {
+  .adm-main    { min-width: 0 !important; overflow-x: hidden !important; }
+  .adm-content { min-width: 0; overflow-x: hidden; }
+  .p-datatable-wrapper { overflow-x: auto !important; min-width: 0; }
+  .p-datatable-table { min-width: 600px; }
+  .p-datatable-tbody > tr > td { white-space: nowrap; }
+  .p-paginator { flex-wrap: wrap; gap: 4px; padding: 0.5rem 0.75rem !important; }
+}
+
+@media (max-width: 480px) {
+  .p-datatable-sm .p-datatable-thead > tr > th { padding: 0.6rem 0.75rem !important; }
+  .p-datatable-sm .p-datatable-tbody > tr > td { padding: 0.6rem 0.75rem !important; }
+}
+
+// ── 2-column form grids → 1 column on mobile ────────────────
+@media (max-width: 640px) {
+  .bn-form-2col, .bn-toggle-row,
+  .blg-form-2col,
+  .cp-form-2col,
+  .cat-form-2col, .cat-toggle-row,
+  .fq-form-2col,
+  .ab-2col,
+  .st-2col,
+  .tst-form-2col,
+  .adlg-row-2, .adlg-tgl-grid,
+  .toggle-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+// ── Per-page padding + KPI grid overrides (all admin pages) ──
+@media (max-width: 768px) {
+  .db-page, .ol-page, .pl-page, .cu-page, .page-wrap,
+  .fq-page, .cp-page, .pg-page, .rf-page, .tp-page, .bn-page, .blg-page,
+  .gl-page, .cat-page, .ab-page, .pay-page, .tst-page, .cn-page, .qz-page,
+  .rp-page, .rt-page, .nl-page, .st-page, .rv-page {
+    padding: 14px !important;
+    overflow-x: hidden !important;
+  }
+
+  .db-kpi-grid,
+  .ol-kpi-row, .pl-kpi-row, .cu-kpi-row, .cn-kpi-row, .bn-kpi-row,
+  .fq-kpi-row, .cp-kpi-row, .pay-kpi-row, .gl-kpi-row, .qz-kpi-row,
+  .cat-kpi-row, .rf-kpi-row, .blg-kpi-row, .rt-kpi-row, .rp-kpi-row,
+  .rv-kpi-row, .nl-kpi-row, .tst-kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .db-page, .ol-page, .pl-page, .cu-page, .page-wrap,
+  .fq-page, .cp-page, .pg-page, .rf-page, .tp-page, .bn-page, .blg-page,
+  .gl-page, .cat-page, .ab-page, .pay-page, .tst-page, .cn-page, .qz-page,
+  .rp-page, .rt-page, .nl-page, .st-page, .rv-page {
+    padding: 12px !important;
+  }
+
+  .db-kpi-grid,
+  .ol-kpi-row, .pl-kpi-row, .cu-kpi-row, .cn-kpi-row, .bn-kpi-row,
+  .fq-kpi-row, .cp-kpi-row, .pay-kpi-row, .gl-kpi-row, .qz-kpi-row,
+  .cat-kpi-row, .rf-kpi-row, .blg-kpi-row, .rt-kpi-row, .rp-kpi-row,
+  .rv-kpi-row, .nl-kpi-row, .tst-kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+}

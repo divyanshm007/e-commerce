@@ -1,0 +1,29 @@
+# local secrets - never commit
+appsettings.Local.json
+**/appsettings.Local.json
+.env
+.env.*
+!env.production.example
+*.pfx
+*.key
+
+# database dumps and backups hold customer data
+backup/
+*.dump
+*.sql.gz
+uat_data_push.sql
+**/uat_data_push.sql
+
+# build output and local tooling
+**/bin/
+**/obj/
+**/publish/
+**/node_modules/
+**/dist/
+**/.angular/
+**/logs/
+**/wwwroot/uploads/
+*.tgz
+.claude/
+.vs/
+.vscode/

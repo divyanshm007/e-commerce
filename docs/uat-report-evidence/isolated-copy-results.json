@@ -1,0 +1,698 @@
+[
+ {
+  "module": "Admin login",
+  "test": "admin e-mail with a wrong password",
+  "expected": "HTTP 401",
+  "actual": "HTTP 401 \"Invalid email or password.\"",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Admin login",
+  "test": "admin login with the seed test account",
+  "expected": "HTTP 200, role SuperAdmin(2), token issued",
+  "actual": "HTTP 200, role=2, token=issued (hidden), expires=2026-11-04T10:08",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Admin login",
+  "test": "profile of the logged-in admin",
+  "expected": "role 2, e-mail matches",
+  "actual": "HTTP 200, role=2, emailMatches=true",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Admin login",
+  "test": "token carries expiry + issued-at + role",
+  "expected": "exp, iat and role claims present",
+  "actual": "exp=true iat=true role=SuperAdmin",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "statistics endpoint",
+  "expected": "HTTP 200 with totals",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "total orders = database",
+  "expected": "4",
+  "actual": "4",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "total customers = database",
+  "expected": "2",
+  "actual": "2",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "total products = database",
+  "expected": "25",
+  "actual": "25",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "total categories = database",
+  "expected": "4",
+  "actual": "4",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "revenue = paid orders in the database",
+  "expected": "0",
+  "actual": "0",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "weekly sales chart",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 7 rows",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "monthly sales chart",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 12 rows",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "recent orders",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 4 rows",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "best sellers",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 10 rows",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "low stock",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 1 rows",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Dashboard",
+  "test": "visitor stats",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products (admin)",
+  "test": "list all products",
+  "expected": "25 products",
+  "actual": "25",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products (admin)",
+  "test": "low-stock report",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 1 items",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products (admin)",
+  "test": "product detail incl. images",
+  "expected": "name, price, images",
+  "actual": "Wheat Grass Capsules, price=400, images=1",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products (admin)",
+  "test": "update stock (+5) on the COPY",
+  "expected": "stock 12",
+  "actual": "HTTP 200, stock=12",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products (admin)",
+  "test": "restore stock on the COPY",
+  "expected": "stock 7",
+  "actual": "7",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products (admin)",
+  "test": "deactivate then reactivate a product (COPY)",
+  "expected": "both HTTP 200",
+  "actual": "HTTP 200 / 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Categories (admin)",
+  "test": "list categories",
+  "expected": "4",
+  "actual": "4",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Categories (admin)",
+  "test": "create a category (COPY)",
+  "expected": "HTTP 201/200, id returned",
+  "actual": "HTTP 200, id=yes",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Categories (admin)",
+  "test": "update the category",
+  "expected": "name changed",
+  "actual": "HTTP 200, name=ZZ TEST CATEGORY 2",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Categories (admin)",
+  "test": "delete the test category (COPY)",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Customers",
+  "test": "customer list",
+  "expected": "2 customers",
+  "actual": "2",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Customers",
+  "test": "customer detail (orders/spend)",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, orders=3",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders (admin)",
+  "test": "order list",
+  "expected": "4 orders",
+  "actual": "4",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders (admin)",
+  "test": "order detail: items, address, totals",
+  "expected": "items + shipping address + total",
+  "actual": "HTTP 200, items=2, city=New Delhi, total=370",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders (admin)",
+  "test": "order statistics",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, total=4",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders (admin)",
+  "test": "search orders by number",
+  "expected": "matches",
+  "actual": "4 match(es)",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders (admin)",
+  "test": "invoice download",
+  "expected": "HTTP 200 file",
+  "actual": "HTTP 200 application/pdf",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Reviews",
+  "test": "admin review list",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 0 reviews",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Coupons",
+  "test": "admin coupon list",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 0 coupons",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Coupons",
+  "test": "create a coupon (COPY)",
+  "expected": "created",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Coupons",
+  "test": "validate it for a 500 order",
+  "expected": "valid, discount 50",
+  "actual": "isValid=true, discount=50",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Coupons",
+  "test": "delete the test coupon (COPY)",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Banners",
+  "test": "banner list",
+  "expected": "5 banners",
+  "actual": "5",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Banners",
+  "test": "create a banner (COPY)",
+  "expected": "created",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Banners",
+  "test": "delete the test banner (COPY)",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "FAQs",
+  "test": "FAQ list",
+  "expected": "16",
+  "actual": "16",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "FAQs",
+  "test": "create a FAQ (COPY)",
+  "expected": "created",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "FAQs",
+  "test": "delete the test FAQ (COPY)",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Contact enquiries",
+  "test": "admin inbox",
+  "expected": "1 original message",
+  "actual": "HTTP 200, 1 message(s)",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Newsletter",
+  "test": "subscriber list",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Settings (read-only)",
+  "test": "website settings",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, {\"siteName\":null,\"logoUrl\":null,\"faviconUrl\":null,\"email\":null,\"phone\":null,\"address\":null",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Settings (read-only)",
+  "test": "shipping settings",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, {\"id\":\"cc98a926-651f-4681-a050-01967188be06\",\"shippingCharge\":0,\"freeShippingAbove\":0,\"fre",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Settings (read-only)",
+  "test": "tax settings",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, {\"id\":\"111ad259-0569-4efa-a103-07515d086562\",\"name\":\"GST\",\"percentage\":18,\"isApplicable\":t",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Payment configuration (read-only)",
+  "test": "current Razorpay mode + key sets",
+  "expected": "mode=test, test key configured",
+  "actual": "mode=test, keyId=rzp_test_…, testConfigured=true, liveConfigured=false",
+  "status": "Pass",
+  "evidence": "the switch was only READ, never written"
+ },
+ {
+  "module": "Payment configuration (read-only)",
+  "test": "admin payments list",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 0 payments",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Customer",
+  "test": "registration",
+  "expected": "HTTP 200, role Customer(1), token",
+  "actual": "HTTP 200, role=1",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Customer",
+  "test": "duplicate e-mail is refused",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400 Email already registered.",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Customer",
+  "test": "login with the new account",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Role separation",
+  "test": "customer token on admin endpoint /orders",
+  "expected": "HTTP 403",
+  "actual": "HTTP 403",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Role separation",
+  "test": "customer token on admin endpoint /customers",
+  "expected": "HTTP 403",
+  "actual": "HTTP 403",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Role separation",
+  "test": "customer token on admin endpoint /dashboard/stats",
+  "expected": "HTTP 403",
+  "actual": "HTTP 403",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Role separation",
+  "test": "customer token on admin endpoint /payments",
+  "expected": "HTTP 403",
+  "actual": "HTTP 403",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Role separation",
+  "test": "customer token on admin endpoint /reviews",
+  "expected": "HTTP 403",
+  "actual": "HTTP 403",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Role separation",
+  "test": "customer token on admin endpoint /content/contact/messages",
+  "expected": "HTTP 403",
+  "actual": "HTTP 403",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Role separation",
+  "test": "customer token on admin endpoint /payments/razorpay/mode",
+  "expected": "HTTP 403",
+  "actual": "HTTP 403",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart (logged in)",
+  "test": "add 2 units",
+  "expected": "line qty 2",
+  "actual": "qty=2, total=760",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart (logged in)",
+  "test": "persists across requests",
+  "expected": "same line",
+  "actual": "lines=1",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart (logged in)",
+  "test": "persists after logging in again from another session",
+  "expected": "cart still holds the line",
+  "actual": "lines=1",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart (logged in)",
+  "test": "a logged-out visitor on the same browser session cannot see the user's cart",
+  "expected": "empty",
+  "actual": "lines=0",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Order creation (COD, no payment)",
+  "test": "place a cash-on-delivery order",
+  "expected": "order created, status Pending, owner = the logged-in customer",
+  "actual": "ORD-20261103-FE6867, status=1, total=760",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Order creation (COD, no payment)",
+  "test": "owner is the customer, not the admin",
+  "expected": "customer e-mail",
+  "actual": "matches the customer",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Order creation (COD, no payment)",
+  "test": "stock reduced by the quantity",
+  "expected": "5",
+  "actual": "5",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Order creation (COD, no payment)",
+  "test": "purchased items removed from the cart",
+  "expected": "cart empty",
+  "actual": "lines=0",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Order history",
+  "test": "customer sees the order in my-orders",
+  "expected": "1 order",
+  "actual": "1 order(s): ORD-20261103-FE6867",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Order history",
+  "test": "another customer cannot read this order",
+  "expected": "HTTP 403",
+  "actual": "HTTP 403",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders (admin)",
+  "test": "admin sees the customer's new order",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, <test customer>",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders (admin)",
+  "test": "status flow Pending -> Confirmed -> Shipped -> Delivered (COPY)",
+  "expected": "all HTTP 200, final Delivered",
+  "actual": "HTTP 200/200/200, final=4",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders",
+  "test": "a delivered order cannot be cancelled",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders",
+  "test": "customer cancels a pending order; stock restored",
+  "expected": "stock 4 -> 5",
+  "actual": "HTTP 200, stock 4 -> 5",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Payments",
+  "test": "create an (unpaid) Razorpay TEST-mode order",
+  "expected": "real Razorpay test order id, mode test, key rzp_test_",
+  "actual": "HTTP 200, id=order_TvfE…, mode=test, key=rzp_test_…",
+  "status": "Pass",
+  "evidence": "no payment made; order left unpaid then cancelled"
+ },
+ {
+  "module": "Payments",
+  "test": "a forged payment signature is rejected",
+  "expected": "HTTP 400, order stays unpaid",
+  "actual": "HTTP 400 \"Invalid payment signature.\", paymentStatus=1",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Payments",
+  "test": "webhook with a bad signature is rejected",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password (full flow, COPY)",
+  "test": "request a code for a real account",
+  "expected": "HTTP 200 generic; OTP hash stored; no e-mail sent (SMTP off)",
+  "actual": "HTTP 200, hashStored=true",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password (full flow, COPY)",
+  "test": "wrong code is rejected",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password (full flow, COPY)",
+  "test": "correct code yields a one-time reset token",
+  "expected": "HTTP 200 + token",
+  "actual": "HTTP 200, token=issued (hidden)",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password (full flow, COPY)",
+  "test": "set the new password",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Logout / sessions",
+  "test": "existing session is invalidated by the password reset",
+  "expected": "HTTP 401",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password (full flow, COPY)",
+  "test": "old password no longer works",
+  "expected": "HTTP 401",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password (full flow, COPY)",
+  "test": "new password works",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password (full flow, COPY)",
+  "test": "an admin account cannot be reset through the customer portal",
+  "expected": "generic answer; no new code issued (timestamp + hash unchanged)",
+  "actual": "HTTP 200; admin row unchanged: true",
+  "status": "Pass",
+  "evidence": "first run flagged a stale hash from 2026-10-14 (my earlier UAT test); the check now compares before/after"
+ },
+ {
+  "module": "Contact form (API)",
+  "test": "empty submission",
+  "expected": "HTTP 400 (validation)",
+  "actual": "HTTP 200",
+  "status": "Fail",
+  "evidence": "DEFECT confirmed on the copy as well: no server-side validation"
+ }
+]

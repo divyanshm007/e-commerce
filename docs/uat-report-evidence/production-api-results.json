@@ -1,0 +1,722 @@
+[
+ {
+  "module": "HTTPS & domains",
+  "test": "https://sidham.in/",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": "236 ms"
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "https://www.sidham.in/",
+  "expected": "HTTP 301",
+  "actual": "HTTP 301 -> https://sidham.in/",
+  "status": "Pass",
+  "evidence": "224 ms"
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "https://nexus.sidham.in/",
+  "expected": "HTTP 301",
+  "actual": "HTTP 301 -> https://sidham.in/admin/login",
+  "status": "Pass",
+  "evidence": "236 ms"
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "sidham.in serves the UAT Angular app",
+  "expected": "contains <app-root>, no Next.js marker",
+  "actual": "app-root=true, _next=false, title=\"Sidham Pharmacy — Authentic Medicines & Healthcare\"",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "security header strict-transport-security on sidham.in",
+  "expected": "present",
+  "actual": "max-age=31536000",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "security header x-content-type-options on sidham.in",
+  "expected": "present",
+  "actual": "nosniff",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "security header x-frame-options on sidham.in",
+  "expected": "present",
+  "actual": "SAMEORIGIN",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "security header referrer-policy on sidham.in",
+  "expected": "present",
+  "actual": "strict-origin-when-cross-origin",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "HTTP redirects to HTTPS",
+  "expected": "301 to https",
+  "actual": "HTTP 301 -> https://sidham.in/",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "api.sidham.in answers over HTTPS",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": "120 ms"
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "CORS preflight from https://sidham.in",
+  "expected": "allow-origin = https://sidham.in",
+  "actual": "https://sidham.in",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "HTTPS & domains",
+  "test": "CORS refuses an unknown origin",
+  "expected": "no allow-origin header",
+  "actual": "none",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "SEO & redirects",
+  "test": "old URL /all-products",
+  "expected": "301 -> /products",
+  "actual": "HTTP 301 -> /products",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "SEO & redirects",
+  "test": "old URL /about-us",
+  "expected": "301 -> /about",
+  "actual": "HTTP 301 -> /about",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "SEO & redirects",
+  "test": "old URL /contact-us",
+  "expected": "301 -> /contact",
+  "actual": "HTTP 301 -> /contact",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "SEO & redirects",
+  "test": "old URL /faq",
+  "expected": "301 -> /faqs",
+  "actual": "HTTP 301 -> /faqs",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "SEO & redirects",
+  "test": "old URL /category/guggulu",
+  "expected": "301 -> /products/category/guggulu",
+  "actual": "HTTP 301 -> /products/category/guggulu",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "SEO & redirects",
+  "test": "old URL /terms-of-service",
+  "expected": "301 -> /page/terms-conditions",
+  "actual": "HTTP 301 -> /page/terms-conditions",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "SEO & redirects",
+  "test": "old URL /orders",
+  "expected": "301 -> /account/orders",
+  "actual": "HTTP 301 -> /account/orders",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Routing",
+  "test": "SPA deep link /products/category/guggulu",
+  "expected": "HTTP 200 (index.html)",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Routing",
+  "test": "SPA deep link /account/orders",
+  "expected": "HTTP 200 (index.html)",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Routing",
+  "test": "SPA deep link /admin/login",
+  "expected": "HTTP 200 (index.html)",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Routing",
+  "test": "SPA deep link /admin/forgot-password",
+  "expected": "HTTP 200 (index.html)",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Routing",
+  "test": "SPA deep link /auth/forgot-password",
+  "expected": "HTTP 200 (index.html)",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Routing",
+  "test": "SPA deep link /order-confirmation/X",
+  "expected": "HTTP 200 (index.html)",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Categories",
+  "test": "GET /categories",
+  "expected": "success + list",
+  "actual": "HTTP 200, 4 categories",
+  "status": "Pass",
+  "evidence": "[\"Baby Care\",\"Seasonal Care\",\"Guggulu\",\"Personal Care\"]"
+ },
+ {
+  "module": "Categories",
+  "test": "GET /categories/root",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 4 root",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products",
+  "test": "list products (pageSize 50)",
+  "expected": "success; total > 0",
+  "actual": "HTTP 200, total=25, returned=25",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products",
+  "test": "pagination page 2",
+  "expected": "different items than page 1",
+  "actual": "10 items, first=Manjistha Churna",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products",
+  "test": "search 'wheat'",
+  "expected": "returns matching product(s)",
+  "actual": "1 result(s): Wheat Grass Capsules",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products",
+  "test": "search with no match",
+  "expected": "0 results",
+  "actual": "0 results",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products",
+  "test": "sort by price ascending",
+  "expected": "non-decreasing prices",
+  "actual": "first=100 last=800",
+  "status": "Pass",
+  "evidence": "n=25"
+ },
+ {
+  "module": "Products",
+  "test": "product detail by slug (wheat-grass-capsules)",
+  "expected": "success, name/price present",
+  "actual": "HTTP 200, Wheat Grass Capsules, price=400, stock=7",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products",
+  "test": "product detail by id",
+  "expected": "same product",
+  "actual": "HTTP 200 wheat-grass-capsules",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products",
+  "test": "unknown product slug",
+  "expected": "HTTP 404",
+  "actual": "HTTP 404",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Products",
+  "test": "no negative stock values",
+  "expected": "0 products",
+  "actual": "0",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Images",
+  "test": "every product primary image resolves to an image file",
+  "expected": "all HTTP 200 image/*",
+  "actual": "25 ok, 0 broken",
+  "status": "Pass",
+  "evidence": "25 products have an image of 25"
+ },
+ {
+  "module": "Images",
+  "test": "products without an image",
+  "expected": "0 (informational)",
+  "actual": "0",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Images",
+  "test": "image also reachable via sidham.in/uploads",
+  "expected": "image/*",
+  "actual": "200 image/webp",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Public content",
+  "test": "GET /content/banners",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200, 5 items",
+  "status": "Pass",
+  "evidence": "57 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /content/faqs",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200, 16 items",
+  "status": "Pass",
+  "evidence": "55 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /content/testimonials",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200, 8 items",
+  "status": "Pass",
+  "evidence": "101 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /content/promotion-headers",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200, 0 items",
+  "status": "Pass",
+  "evidence": "58 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /settings/website",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": "56 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /settings/shipping",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": "80 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /settings/tax",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": "89 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /content/pages/privacy-policy",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": "62 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /content/pages/terms-conditions",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200",
+  "status": "Pass",
+  "evidence": "40 ms"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /blog (blog list)",
+  "expected": "HTTP 200 + posts",
+  "actual": "HTTP 200, 2 posts",
+  "status": "Pass",
+  "evidence": "first run used wrong route /blogs (test error)"
+ },
+ {
+  "module": "Public content",
+  "test": "GET /gallery",
+  "expected": "HTTP 200 + data",
+  "actual": "HTTP 200, 1 items",
+  "status": "Pass",
+  "evidence": "87 ms"
+ },
+ {
+  "module": "Reviews",
+  "test": "public approved reviews of a product",
+  "expected": "HTTP 200",
+  "actual": "HTTP 200, 0 reviews",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Coupons",
+  "test": "validate a non-existent coupon",
+  "expected": "isValid=false, discountAmount=0",
+  "actual": "HTTP 200, isValid=false, discountAmount=0, message=\"Invalid or expired coupon code.\"",
+  "status": "Pass",
+  "evidence": "API returns 200 with isValid=false (by design)"
+ },
+ {
+  "module": "Cart",
+  "test": "guest: add item (qty 2)",
+  "expected": "cart with 1 line, qty 2",
+  "actual": "HTTP 200, lines=1, qty=2, total=760",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart",
+  "test": "guest: cart persists on a new request (same session)",
+  "expected": "same line still there",
+  "actual": "lines=1",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart",
+  "test": "a different session does not see that cart",
+  "expected": "empty cart",
+  "actual": "lines=0",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart",
+  "test": "guest: update quantity to 3",
+  "expected": "qty 3, total = 3 x unit",
+  "actual": "qty=3, total=1140",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart",
+  "test": "stock validation: add more than the stock",
+  "expected": "rejected",
+  "actual": "HTTP 400 Insufficient stock.",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Cart",
+  "test": "guest: remove item",
+  "expected": "cart empty",
+  "actual": "lines=0",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders",
+  "test": "create order with no items/address is refused",
+  "expected": "HTTP 400, nothing created",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders",
+  "test": "guest order without name/email is refused",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400 Guest name is required for guest checkout.",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Orders",
+  "test": "track a non-existent order number",
+  "expected": "HTTP 404",
+  "actual": "HTTP 404",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Contact",
+  "test": "empty contact submission is refused",
+  "expected": "HTTP 400",
+  "actual": "HTTP 200",
+  "status": "Fail",
+  "evidence": "DEFECT: the API saved the request and e-mailed the store owner; 2 junk rows were created in production by this test"
+ },
+ {
+  "module": "Contact",
+  "test": "invalid e-mail is refused",
+  "expected": "HTTP 400",
+  "actual": "HTTP 200",
+  "status": "Fail",
+  "evidence": "DEFECT: the API saved the request and e-mailed the store owner; 2 junk rows were created in production by this test"
+ },
+ {
+  "module": "Authentication",
+  "test": "login with unknown account",
+  "expected": "HTTP 401, generic message",
+  "actual": "HTTP 401 \"Invalid email or password.\"",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Authentication",
+  "test": "login with invalid input",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Authentication",
+  "test": "registration with a weak password is refused (no account created)",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /orders",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /customers",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /dashboard/stats",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /payments",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /payments/razorpay/mode",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous PUT /payments/razorpay/mode",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /contact/messages",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 404",
+  "status": "Pass",
+  "evidence": "route name not used by this API"
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /content/contact/messages",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /reviews",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /coupons",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /cart/all",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /auth/profile",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /orders/my-orders",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Protected routes",
+  "test": "anonymous GET /newsletter/subscribers",
+  "expected": "HTTP 401 (or 404 if the route name differs)",
+  "actual": "HTTP 404",
+  "status": "Pass",
+  "evidence": "route name not used by this API"
+ },
+ {
+  "module": "Protected routes",
+  "test": "forged/invalid token on /orders",
+  "expected": "HTTP 401",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Payments",
+  "test": "the Test/Live switch cannot be changed anonymously",
+  "expected": "HTTP 401",
+  "actual": "HTTP 401",
+  "status": "Pass",
+  "evidence": "switch was NOT touched by these tests"
+ },
+ {
+  "module": "Forgot password",
+  "test": "unknown e-mail returns the generic answer (no enumeration, nothing sent)",
+  "expected": "HTTP 200 generic, empty data",
+  "actual": "HTTP 200 \"If this email is registered, a verification code has been se\" data=\"\"",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password",
+  "test": "invalid e-mail format",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password",
+  "test": "verify a code for an unknown account",
+  "expected": "HTTP 400 'Invalid or expired code'",
+  "actual": "HTTP 400 \"Invalid or expired code.\"",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password",
+  "test": "non-6-digit code is rejected by validation",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password",
+  "test": "reset without a valid verified token",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password",
+  "test": "weak new password rejected",
+  "expected": "HTTP 400",
+  "actual": "HTTP 400",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Forgot password",
+  "test": "rate limit (14 rapid requests, unknown e-mails only)",
+  "expected": "later requests answered 429",
+  "actual": "10 of 14 got HTTP 429",
+  "status": "Pass",
+  "evidence": ""
+ },
+ {
+  "module": "Performance",
+  "test": "products list x10",
+  "expected": "median < 800 ms",
+  "actual": "median 60 ms, max 85 ms",
+  "status": "Pass",
+  "evidence": ""
+ }
+]

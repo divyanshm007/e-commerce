@@ -1,0 +1,78 @@
+# Production stack: Angular frontend + .NET API + the EXISTING UAT PostgreSQL database (same data volume) + nginx.
+#
+#   docker compose --env-file .env.production -f docker-compose.production.yml up -d
+#
+# The database is NOT recreated: the volume that already holds the UAT database ("sidham-uat_pgdata-uat") is attached
+# as-is, so the UAT database becomes the production database. Never run `docker compose down -v` on this project.
+name: sidham-live
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: sidham-live-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ecommerce_db
+      POSTGRES_PASSWORD: ${DB_PASSWORD}          # only used when a brand-new volume is initialised; the running password is changed with ALTER USER (see CUTOVER-PLAN.md)
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ecommerce_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  api:
+    image: sidham-live-api:${RELEASE}
+    container_name: sidham-live-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env.production                     # SMTP, Razorpay, JWT ... (never committed)
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=ecommerce_db;Username=postgres;Password=${DB_PASSWORD}"
+      AllowedOrigins__0: https://sidham.in
+      AllowedOrigins__1: https://www.sidham.in
+      AllowedOrigins__2: https://nexus.sidham.in
+    volumes:
+      - uploads:/app/wwwroot/uploads              # product/banner/hero images - must survive container rebuilds
+      - logs:/app/logs
+    networks: [internal]
+
+  web:
+    image: sidham-live-web:${RELEASE}             # built with: --build-arg BUILD_CONFIG=production
+    container_name: sidham-live-web
+    restart: unless-stopped
+    networks: [internal]
+
+  proxy:
+    image: nginx:alpine
+    container_name: sidham-live-proxy
+    restart: unless-stopped
+    depends_on: [api, web]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/production.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/old-product-redirects.conf:/etc/nginx/conf.d/old-product-redirects.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot-www:/var/www/certbot:ro
+      - uploads:/uploads:ro
+    networks: [internal]
+
+volumes:
+  pgdata:
+    external: true
+    name: sidham-uat_pgdata-uat                   # the existing UAT database volume
+  uploads:
+  logs:
+
+networks:
+  internal:
+    driver: bridge

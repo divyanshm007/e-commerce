@@ -1,0 +1,53 @@
+restored from backup: uat_ecommerce_db_before_migration_20261103-072150.dump (832458 bytes)
+BEFORE: tables=39  tables checksummed=38  history rows=3  rows in all tables=19961
+
+== apply the reviewed migration script (ON_ERROR_STOP, single transaction)
+script exit: 0
+
+== tables added:
+> ShipmentTrackingEvents
+> Shipments
+
+== data of every EXISTING table (row count + md5 of all rows)
+IDENTICAL for all 38 existing tables
+
+== migration history rows added:
+> 20261109091756_AddShipmentTracking
+
+== schema (pg_dump -s, in dump order) before vs after
+lines removed: 0   lines added: 66
+added DDL statements:
+CREATE TABLE public."ShipmentTrackingEvents" (
+CONSTRAINT "CK_ShipmentTrackingEvents_MappedStatus" CHECK ((("MappedStatus")::text = ANY ((ARRAY['CREATED'::character varying, 'PICKED_UP'::character varying, 'IN_TRANSIT'::character varying, 'OUT_FOR
+CREATE TABLE public."Shipments" (
+"Status" character varying(30) DEFAULT 'CREATED'::character varying NOT NULL,
+CONSTRAINT "CK_Shipments_AwbWhenCreated" CHECK (((("CreationState")::text <> 'CREATED'::text) OR ("Awb" IS NOT NULL))),
+CONSTRAINT "CK_Shipments_CreationState" CHECK ((("CreationState")::text = ANY ((ARRAY['IN_FLIGHT'::character varying, 'CREATED'::character varying, 'FAILED'::character varying, 'UNKNOWN'::character va
+CONSTRAINT "CK_Shipments_Status" CHECK ((("Status")::text = ANY ((ARRAY['CREATED'::character varying, 'PICKED_UP'::character varying, 'IN_TRANSIT'::character varying, 'OUT_FOR_DELIVERY'::character var
+ALTER TABLE ONLY public."ShipmentTrackingEvents"
+ADD CONSTRAINT "PK_ShipmentTrackingEvents" PRIMARY KEY ("Id");
+ALTER TABLE ONLY public."Shipments"
+ADD CONSTRAINT "PK_Shipments" PRIMARY KEY ("Id");
+CREATE INDEX "IX_ShipmentTrackingEvents_Shipment_ScanTime" ON public."ShipmentTrackingEvents" USING btree ("ShipmentId", "ScanTime" DESC);
+CREATE INDEX "IX_Shipments_CreatedByUserId" ON public."Shipments" USING btree ("CreatedByUserId");
+CREATE INDEX "IX_Shipments_Order_CreatedAt" ON public."Shipments" USING btree ("OrderId", "CreatedAt");
+CREATE INDEX "IX_Shipments_Poll" ON public."Shipments" USING btree ("NextCheckAt") WHERE ((("CreationState")::text = 'CREATED'::text) AND ("IsFinal" = false));
+CREATE UNIQUE INDEX "UX_ShipmentTrackingEvents_Shipment_Hash" ON public."ShipmentTrackingEvents" USING btree ("ShipmentId", "EventHash");
+CREATE UNIQUE INDEX "UX_Shipments_Mode_Awb" ON public."Shipments" USING btree ("Mode", "Awb") WHERE ("Awb" IS NOT NULL);
+CREATE UNIQUE INDEX "UX_Shipments_Mode_ClientOrderRef" ON public."Shipments" USING btree ("Mode", "ClientOrderRef");
+CREATE UNIQUE INDEX "UX_Shipments_Order_Open" ON public."Shipments" USING btree ("OrderId") WHERE ((("CreationState")::text = ANY ((ARRAY['IN_FLIGHT'::character varying, 'CREATED'::character varying, 
+ALTER TABLE ONLY public."ShipmentTrackingEvents"
+ADD CONSTRAINT "FK_ShipmentTrackingEvents_Shipments_ShipmentId" FOREIGN KEY ("ShipmentId") REFERENCES public."Shipments"("Id") ON DELETE RESTRICT;
+ALTER TABLE ONLY public."Shipments"
+ADD CONSTRAINT "FK_Shipments_Orders_OrderId" FOREIGN KEY ("OrderId") REFERENCES public."Orders"("Id") ON DELETE RESTRICT;
+ALTER TABLE ONLY public."Shipments"
+ADD CONSTRAINT "FK_Shipments_Users_CreatedByUserId" FOREIGN KEY ("CreatedByUserId") REFERENCES public."Users"("Id") ON DELETE SET NULL;
+added DDL statements that name any other table:
+>     "Status" character varying(30) DEFAULT 'CREATED'::character varying NOT NULL,
+
+== Down path: drop both tables and the history row, compare with the original
+schema after Down == schema before: IDENTICAL
+data after Down == data before: IDENTICAL
+history after Down == history before: IDENTICAL
+
+disposable database dropped
