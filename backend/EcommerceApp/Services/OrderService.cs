@@ -193,6 +193,8 @@ public class OrderService : IOrderService
         if (dto.Items.Any(i => i.Quantity < 1))
             return ApiResponse<OrderDetailDto>.Fail("Item quantity must be at least 1.");
 
+        await CancelEarlierUnpaidOnlineOrdersAsync(dto);
+
         var shipPhone = ContactNormalizer.TryNormalizePhone(dto.ShippingAddress.Phone);
         var billPhone = ContactNormalizer.TryNormalizePhone(dto.BillingAddress.Phone);
         if (shipPhone == null || billPhone == null)
@@ -412,10 +414,59 @@ public class OrderService : IOrderService
         return ApiResponse<string>.Ok("Order status updated.");
     }
 
+    public async Task<ApiResponse<string>> CancelUnpaidOnlineOrderAsync(Guid orderId, Guid? callerId, bool anyOwner = false, string? reason = null)
+    {
+        var order = await _db.Orders.AsNoTracking().Include(o => o.Payments).FirstOrDefaultAsync(o => o.Id == orderId);
+        if (order == null) return ApiResponse<string>.NotFound("Order not found.");
+        if (!anyOwner && order.UserId != null && order.UserId != callerId) return ApiResponse<string>.NotFound("Order not found.");
+        if (order.PaymentMethod != PaymentMethod.Razorpay) return ApiResponse<string>.Fail("Only an online-payment order can be closed this way.", 400);
+        if (order.Status == OrderStatus.Cancelled) return ApiResponse<string>.Ok("Order is already cancelled.");
+        if (order.PaymentStatus == PaymentStatus.Paid || order.Payments.Any(p => p.Status == PaymentStatus.Paid))
+            return ApiResponse<string>.Fail("This order has already been paid.", 409);
+
+        var result = await CancelCoreAsync(orderId, reason ?? "Online payment was not completed", order.UserId, callerIsAdmin: true, notify: false);
+        if (!result.Success) return result;
+
+        var now = DateTime.UtcNow;
+        await _db.Orders.Where(o => o.Id == orderId && o.PaymentStatus == PaymentStatus.Pending)
+            .ExecuteUpdateAsync(s => s.SetProperty(o => o.PaymentStatus, PaymentStatus.Failed).SetProperty(o => o.UpdatedAt, now));
+        await _db.Payments.Where(p => p.OrderId == orderId && p.Status == PaymentStatus.Pending)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, PaymentStatus.Failed).SetProperty(p => p.UpdatedAt, now));
+        return ApiResponse<string>.Ok("Payment cancelled. The order was not placed.");
+    }
+
+    public async Task<int> CancelAbandonedOnlineOrdersAsync(TimeSpan olderThan)
+    {
+        var cutoff = DateTime.UtcNow - olderThan;
+        var ids = await _db.Orders
+            .Where(o => o.PaymentMethod == PaymentMethod.Razorpay && o.PaymentStatus == PaymentStatus.Pending && o.Status == OrderStatus.Pending && o.CreatedAt < cutoff)
+            .OrderBy(o => o.CreatedAt).Select(o => o.Id).Take(100).ToListAsync();
+        var cancelled = 0;
+        foreach (var id in ids)
+            if ((await CancelUnpaidOnlineOrderAsync(id, null, anyOwner: true, reason: "Online payment was not completed in time")).Success) cancelled++;
+        return cancelled;
+    }
+
+    /// <summary>A customer who starts a new checkout has no use for their own unpaid online orders from earlier: close them first.</summary>
+    private async Task CancelEarlierUnpaidOnlineOrdersAsync(CreateOrderDto dto)
+    {
+        var now = DateTime.UtcNow;
+        var recentEnoughToMatter = now.AddHours(-24);
+        var settled = now.AddMinutes(-2);                 // a payment window opened a moment ago may still be in use in another tab
+        var q = _db.Orders.Where(o => o.PaymentMethod == PaymentMethod.Razorpay && o.PaymentStatus == PaymentStatus.Pending && o.Status == OrderStatus.Pending
+                                      && o.CreatedAt < settled && o.CreatedAt > recentEnoughToMatter);
+        if (dto.UserId != null) q = q.Where(o => o.UserId == dto.UserId);
+        else if (!string.IsNullOrWhiteSpace(dto.GuestEmail)) q = q.Where(o => o.UserId == null && o.GuestEmail == dto.GuestEmail);
+        else return;
+
+        foreach (var id in await q.Select(o => o.Id).Take(20).ToListAsync())
+            await CancelUnpaidOnlineOrderAsync(id, null, anyOwner: true, reason: "Replaced by a newer checkout");
+    }
+
     public Task<ApiResponse<string>> CancelAsync(Guid id, string? reason, Guid? callerId, bool callerIsAdmin) =>
         CancelCoreAsync(id, reason, callerId, callerIsAdmin);
 
-    private async Task<ApiResponse<string>> CancelCoreAsync(Guid id, string? reason, Guid? callerId, bool callerIsAdmin)
+    private async Task<ApiResponse<string>> CancelCoreAsync(Guid id, string? reason, Guid? callerId, bool callerIsAdmin, bool notify = true)
     {
         var order = await _db.Orders.AsNoTracking().Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
         if (order == null || !OrderAccess.CanAccess(order.UserId, callerId, callerIsAdmin))
@@ -477,7 +528,7 @@ public class OrderService : IOrderService
 
         await tx.CommitAsync();
 
-        var cancelDetail = await GetByIdAsync(id);
+        var cancelDetail = notify ? await GetByIdAsync(id) : ApiResponse<OrderDetailDto>.Fail("not needed");
         if (cancelDetail.Data != null)
         {
             var user = order.UserId.HasValue ? await _db.Users.FindAsync(order.UserId.Value) : null;

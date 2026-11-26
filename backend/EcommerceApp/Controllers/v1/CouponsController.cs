@@ -38,6 +38,12 @@ public class CouponsController : BaseController
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCouponDto dto) =>
         ApiResult(await _couponService.UpdateAsync(id, dto));
 
+    /// <summary>The Active switch in the admin coupon list.</summary>
+    [HttpPatch("{id:guid}/toggle-status")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<IActionResult> ToggleStatus(Guid id) =>
+        ApiResult(await _couponService.ToggleStatusAsync(id));
+
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = "SuperAdmin")]
     public async Task<IActionResult> Delete(Guid id) =>

@@ -34,6 +34,11 @@ public class PaymentsController : BaseController
         ApiResult(await _paymentService.CreateRazorpayOrderAsync(
             orderId, IsAuthenticated ? CurrentUserId : null, User.IsInRole("SuperAdmin")));
 
+    /// <summary>The customer closed the payment window (or it failed): the unpaid online order is cancelled and its payment marked Failed.</summary>
+    [HttpPost("razorpay/abandon/{orderId:guid}")]
+    public async Task<IActionResult> AbandonPayment(Guid orderId, [FromServices] IOrderService orders) =>
+        ApiResult(await orders.CancelUnpaidOnlineOrderAsync(orderId, IsAuthenticated ? CurrentUserId : null));
+
     [HttpPost("razorpay/verify")]
     public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentDto dto) =>
         ApiResult(await _paymentService.VerifyPaymentAsync(dto, Request.Headers["X-Session-Id"].FirstOrDefault()));

@@ -57,6 +57,16 @@ public class CouponService : ICouponService
         return await GetByIdAsync(id);
     }
 
+    public async Task<ApiResponse<bool>> ToggleStatusAsync(Guid id)
+    {
+        var coupon = await _db.Coupons.FindAsync(id);
+        if (coupon == null) return ApiResponse<bool>.NotFound("Coupon not found.");
+        coupon.IsActive = !coupon.IsActive;
+        coupon.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        return ApiResponse<bool>.Ok(coupon.IsActive, coupon.IsActive ? "Coupon is now active." : "Coupon is now inactive.");
+    }
+
     public async Task<ApiResponse<string>> DeleteAsync(Guid id)
     {
         var coupon = await _db.Coupons.FindAsync(id);

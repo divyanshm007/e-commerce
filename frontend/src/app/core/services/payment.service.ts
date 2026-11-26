@@ -14,6 +14,11 @@ export class PaymentService {
     return this.api.post<any>(`payments/razorpay/create-order/${orderId}`, {});
   }
 
+  /** The payment window was closed or failed: the unpaid online order is cancelled on the server. */
+  abandonPayment(orderId: string): Observable<ApiResponse<string>> {
+    return this.api.post<string>(`payments/razorpay/abandon/${orderId}`, {});
+  }
+
   verifyPayment(dto: any): Observable<ApiResponse<string>> {
     return this.api.post<string>('payments/razorpay/verify', dto);
   }

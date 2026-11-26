@@ -36,6 +36,7 @@ public static class ServiceExtensions
         services.AddScoped<EcommerceApp.Infrastructure.Services.Fulfilment.FulfilmentProcessor>();
         services.AddHostedService<EcommerceApp.Infrastructure.Services.Fulfilment.FulfilmentWorker>();
         services.AddScoped<ICancellationService, CancellationService>();
+        services.AddHostedService<AbandonedPaymentWorker>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<ICartService, CartService>();
         services.AddHttpClient();

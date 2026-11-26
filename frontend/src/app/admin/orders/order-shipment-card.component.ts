@@ -21,8 +21,8 @@ import { FulfilmentService, OrderShipment } from '../../core/services/fulfilment
     <div *ngIf="!s.fulfilmentState" class="text-sm text-slate-600 flex flex-col gap-3">
       <p class="m-0">This order has not been approved for dispatch.</p>
       <div class="flex gap-2 flex-wrap">
-        <button type="button" class="px-3 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold disabled:opacity-50" [disabled]="busy()" (click)="approve()">Approve for dispatch</button>
-        <button type="button" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-semibold disabled:opacity-50" [disabled]="busy()" (click)="rejecting.set(true)">Reject</button>
+        <button type="button" class="px-3 py-2 rounded-lg bg-green-700 text-white text-sm font-semibold disabled:opacity-50" [disabled]="busy()" (click)="approve()">Approve for dispatch</button>
+        <button type="button" class="px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50" [disabled]="busy()" (click)="rejecting.set(true)">Reject</button>
       </div>
       <div *ngIf="rejecting()" class="flex flex-col gap-2">
         <input class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Reason (required)" [value]="reason" (input)="reason = $any($event.target).value" />
@@ -31,13 +31,13 @@ import { FulfilmentService, OrderShipment } from '../../core/services/fulfilment
     </div>
 
     <div *ngIf="s.fulfilmentState" class="flex flex-col gap-2 text-sm">
-      <div class="flex justify-between"><span class="text-slate-400">Dispatch</span><span class="font-semibold">{{ label(s.fulfilmentState) }}</span></div>
-      <div class="flex justify-between" *ngIf="s.approvedAt"><span class="text-slate-400">Approved</span><span>{{ s.approvedAt | date:'medium' }}{{ s.approvedBy ? ' by ' + s.approvedBy : '' }}</span></div>
-      <div class="flex justify-between" *ngIf="s.courier"><span class="text-slate-400">Courier</span><span>{{ s.courier }}</span></div>
-      <div class="flex justify-between" *ngIf="s.awb"><span class="text-slate-400">AWB</span><span class="font-mono font-semibold">{{ s.awb }}</span></div>
-      <div class="flex justify-between" *ngIf="s.status"><span class="text-slate-400">Shipment status</span><span class="font-semibold">{{ label(s.status) }}</span></div>
-      <div class="flex justify-between" *ngIf="s.expectedDeliveryDate"><span class="text-slate-400">Expected delivery</span><span>{{ s.expectedDeliveryDate | date:'mediumDate' }}</span></div>
-      <div class="flex justify-between" *ngIf="s.mode"><span class="text-slate-400">Environment</span><span>{{ s.mode }}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500">Dispatch</span><span class="font-semibold">{{ label(s.fulfilmentState) }}</span></div>
+      <div class="flex justify-between" *ngIf="s.approvedAt"><span class="text-slate-500">Approved</span><span>{{ s.approvedAt | date:'medium' }}{{ s.approvedBy ? ' by ' + s.approvedBy : '' }}</span></div>
+      <div class="flex justify-between" *ngIf="s.courier"><span class="text-slate-500">Courier</span><span>{{ s.courier }}</span></div>
+      <div class="flex justify-between" *ngIf="s.awb"><span class="text-slate-500">AWB</span><span class="font-mono font-semibold">{{ s.awb }}</span></div>
+      <div class="flex justify-between" *ngIf="s.status"><span class="text-slate-500">Shipment status</span><span class="font-semibold">{{ label(s.status) }}</span></div>
+      <div class="flex justify-between" *ngIf="s.expectedDeliveryDate"><span class="text-slate-500">Expected delivery</span><span>{{ s.expectedDeliveryDate | date:'mediumDate' }}</span></div>
+      <div class="flex justify-between" *ngIf="s.mode"><span class="text-slate-500">Environment</span><span>{{ s.mode }}</span></div>
 
       <div *ngIf="s.attentionReason" class="mt-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">
         <strong>Needs attention:</strong> {{ s.attentionReason }}
@@ -51,7 +51,7 @@ import { FulfilmentService, OrderShipment } from '../../core/services/fulfilment
       <div *ngIf="s.timeline.length" class="mt-3 border-t border-slate-100 pt-3">
         <div class="text-xs font-bold text-slate-500 uppercase mb-2">Tracking history</div>
         <div *ngFor="let e of s.timeline" class="flex gap-3 py-1 text-xs">
-          <span class="text-slate-400 w-36 shrink-0">{{ e.time | date:'dd MMM, h:mm a' }}</span>
+          <span class="text-slate-500 w-36 shrink-0">{{ e.time | date:'dd MMM, h:mm a' }}</span>
           <span><strong>{{ e.status }}</strong><span *ngIf="e.location" class="text-slate-500"> – {{ e.location }}</span></span>
         </div>
       </div>

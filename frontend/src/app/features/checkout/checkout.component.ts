@@ -198,7 +198,7 @@ function sixDigitPin(c: AbstractControl): ValidationErrors | null {
 
         <!-- Coupon -->
         <div class="coupon-row" *ngIf="cart">
-          <mat-form-field appearance="outline" class="coupon-field">
+          <mat-form-field appearance="outline" class="coupon-field" subscriptSizing="dynamic">
             <mat-label>Coupon Code</mat-label>
             <input matInput [(ngModel)]="couponCode" placeholder="SAVE10" />
           </mat-form-field>
@@ -321,9 +321,10 @@ function sixDigitPin(c: AbstractControl): ValidationErrors | null {
     }
 
     .coupon-row {
-      display: flex; gap: 8px; align-items: center; margin: 12px 0 4px;
-      .coupon-field { flex: 1; }
-      button { flex-shrink: 0; height: 56px; }
+      display: flex; align-items: flex-start; gap: 8px; margin: 12px 0 6px;
+      /* the field has no hidden error-text strip (subscriptSizing="dynamic"), so it is 56px tall; the button is the same 56px */
+      .coupon-field { flex: 1; min-width: 0; }
+      button { height: 56px; min-width: 76px; flex-shrink: 0; }
     }
     .coupon-msg { font-size: 12px; color: #16a34a; margin: 0 0 4px; }
 
@@ -350,6 +351,15 @@ export class CheckoutComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
 
   readonly PaymentMethod = PaymentMethod;
+
+  /** The payment window was closed (or could not open): the unpaid order is cancelled so no half-finished order is left behind. */
+  private abandonPayment(orderId: string): void {
+    const done = () => {
+      this.placingOrder = false;
+      this.snackBar.open('Payment was not completed, so no order was placed. You can try again or choose Cash on Delivery.', 'OK', { duration: 6000 });
+    };
+    this.paymentService.abandonPayment(orderId).subscribe({ next: done, error: done });
+  }
   readonly hasOffer = hasOffer;
   readonly mrpLineTotal = mrpLineTotal;
 
@@ -507,10 +517,10 @@ export class CheckoutComponent implements OnInit {
                     }
                   });
                 },
-                onDismiss: () => { this.placingOrder = false; }
+                onDismiss: () => this.abandonPayment(order.id)
               });
             },
-            error: () => { this.placingOrder = false; }
+            error: () => this.abandonPayment(order.id)
           });
         },
         error: (err) => { this.snackBar.open(this.orderError(err), undefined, { duration: 5000 }); this.placingOrder = false; }

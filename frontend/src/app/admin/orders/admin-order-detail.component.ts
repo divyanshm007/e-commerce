@@ -44,13 +44,13 @@ import { OrderShipmentCardComponent } from './order-shipment-card.component';
         <h1 class="text-2xl font-bold text-slate-900 m-0">
           Order {{ order() ? '#' + order()!.orderNumber : '' }}
         </h1>
-        <p class="text-sm text-slate-400 mt-0.5 mb-0">{{ order()?.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
+        <p class="text-sm text-slate-500 mt-0.5 mb-0">{{ order()?.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
       </div>
     </div>
     @if (order()) {
       <div class="flex items-center gap-2">
-        <p-tag [value]="orderStatusLabel(order()!.status)" [severity]="orderStatusSeverity(order()!.status)" />
-        <p-tag [value]="paymentStatusLabel(order()!.paymentStatus)" [severity]="paymentStatusSeverity(order()!.paymentStatus)" />
+        <p-tag [value]="'Order: ' + orderStatusLabel(order()!.status)" [severity]="orderStatusSeverity(order()!.status)" />
+        <p-tag [value]="'Payment: ' + paymentStatusLabel(order()!.paymentStatus)" [severity]="paymentStatusSeverity(order()!.paymentStatus)" />
       </div>
     }
   </div>
@@ -79,7 +79,7 @@ import { OrderShipmentCardComponent } from './order-shipment-card.component';
           <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
             <i class="pi pi-shopping-cart text-green-600"></i>
             <h3 class="text-base font-bold text-slate-900 m-0">Order Items</h3>
-            <span class="ml-auto text-xs text-slate-400">{{ order()!.items.length || 0 }} items</span>
+            <span class="ml-auto text-xs text-slate-500">{{ order()!.items.length || 0 }} items</span>
           </div>
           <div class="divide-y divide-slate-50">
             @for (item of order()!.items; track item.id) {
@@ -95,13 +95,13 @@ import { OrderShipmentCardComponent } from './order-shipment-card.component';
                 <div class="flex-1 min-w-0">
                   <div class="font-semibold text-slate-900 text-sm truncate">{{ item.productName }}</div>
                   @if (item.variantInfo) {
-                    <div class="text-xs text-slate-400 mt-0.5">{{ item.variantInfo }}</div>
+                    <div class="text-xs text-slate-500 mt-0.5">{{ item.variantInfo }}</div>
                   }
                   <div class="text-xs text-slate-500 mt-1">Qty: {{ item.quantity }}</div>
                 </div>
                 <div class="text-right flex-shrink-0">
                   <div class="font-bold text-slate-900 text-sm">{{ item.totalPrice | currency:'INR':'symbol':'1.0-0' }}</div>
-                  <div class="text-xs text-slate-400">
+                  <div class="text-xs text-slate-500">
                     {{ (orderItemHasOffer(item) ? orderItemSellingUnit(item) : item.unitPrice) | currency:'INR':'symbol':'1.0-0' }} each
                     @if (orderItemHasOffer(item)) { <s class="ml-1">{{ item.unitPrice | currency:'INR':'symbol':'1.0-0' }}</s> }
                   </div>
@@ -184,12 +184,12 @@ import { OrderShipmentCardComponent } from './order-shipment-card.component';
             }
           </div>
           <div class="mt-4 pt-4 border-t border-slate-100">
-            <div class="text-xs text-slate-400 mb-1">Payment Method</div>
+            <div class="text-xs text-slate-500 mb-1">Payment Method</div>
             <span class="px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
               {{ order()!.paymentMethod === 1 ? 'Razorpay' : 'Cash on Delivery' }}
             </span>
             @if (order()!.payments?.[0]?.razorpayPaymentId) {
-              <div class="text-xs text-slate-400 mt-2 font-mono">{{ order()!.payments?.[0]?.razorpayPaymentId }}</div>
+              <div class="text-xs text-slate-500 mt-2 font-mono">{{ order()!.payments?.[0]?.razorpayPaymentId }}</div>
             }
           </div>
         </div>
@@ -210,7 +210,7 @@ import { OrderShipmentCardComponent } from './order-shipment-card.component';
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">Tracking Number</label>
-              <input pInputText formControlName="trackingNumber" class="w-full" placeholder="Enter tracking number" />
+              <input pInputText formControlName="trackingNumber" class="w-full" placeholder="Tracking no." />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">Notes</label>
@@ -254,6 +254,9 @@ import { OrderShipmentCardComponent } from './order-shipment-card.component';
   `,
   styles: [`
     :host ::ng-deep .p-select { width: 100%; }
+    /* white text needs a darker green than the default success button */
+    :host ::ng-deep .p-button.p-button-success { background: #15803D !important; border-color: #15803D !important; color: #fff !important; }
+    :host ::ng-deep .p-button.p-button-success:hover { background: #166534 !important; border-color: #166534 !important; }
   `]
 })
 export class AdminOrderDetailComponent implements OnInit {

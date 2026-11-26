@@ -784,8 +784,12 @@ export class AdminCouponsComponent implements OnInit {
   }
 
   toggleStatus(coupon: Coupon): void {
-    this.api.patch(`coupons/${coupon.id}/toggle-status`).subscribe({
-      next: () => this.toast.add({ severity: 'success', summary: 'Updated', detail: 'Status updated', life: 2000 }),
+    this.api.patch<boolean>(`coupons/${coupon.id}/toggle-status`).subscribe({
+      next: res => {
+        coupon.isActive = res.data === true;                                     // what the server now has
+        this.coupons.update(list => [...list]);                                  // refresh the counters
+        this.toast.add({ severity: 'success', summary: 'Updated', detail: res.message || 'Status updated', life: 2000 });
+      },
       error: () => {
         coupon.isActive = !coupon.isActive;
         this.toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update status', life: 3000 });
