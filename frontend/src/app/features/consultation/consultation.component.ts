@@ -5,6 +5,8 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -18,7 +20,8 @@ import { mediaUrl } from '../../core/utils/media';
 @Component({
   selector: 'app-consultation',
   standalone: true,
-  imports: [MatDialogModule, RouterLink, NgIf, NgFor, ReactiveFormsModule, BreadcrumbComponent, PageHeroComponent,
+  providers: [provideNativeDateAdapter()],
+  imports: [MatDatepickerModule, MatDialogModule, RouterLink, NgIf, NgFor, ReactiveFormsModule, BreadcrumbComponent, PageHeroComponent,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule],
   template: `
     <div class="container" style="padding-top:24px">
@@ -87,7 +90,11 @@ import { mediaUrl } from '../../core/utils/media';
           <div class="row-2">
             <mat-form-field appearance="outline">
               <mat-label>Preferred Date</mat-label>
-              <input matInput type="date" formControlName="preferredDate" [min]="minDate" (change)="checkDate()" />
+              <input matInput [matDatepicker]="picker" formControlName="preferredDate" [min]="minDateValue" readonly
+                     placeholder="Choose a date" (click)="picker.open()" />
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-hint>Past dates cannot be chosen</mat-hint>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -201,6 +208,9 @@ export class ConsultationComponent {
 
   submitted = signal(false);
   submitting = signal(false);
+  /** The first day that can be chosen: today (earlier days are greyed out in the calendar). */
+  minDateValue: Date = (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); })();
+
   /** Today in the user's own calendar (toISOString would give the UTC day, which can be yesterday in India). */
   minDate = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })();
   timeSlots = ['9:00 AM – 10:00 AM', '10:00 AM – 11:00 AM', '11:00 AM – 12:00 PM', '2:00 PM – 3:00 PM', '3:00 PM – 4:00 PM', '4:00 PM – 5:00 PM'];
@@ -237,38 +247,23 @@ export class ConsultationComponent {
     email: ['', [Validators.required, Validators.email]],
     phone: ['', [Validators.required, Validators.pattern(/^[6-9]\d{9}$/)]],
     concern: ['', Validators.required],
-    preferredDate: [''],
+    preferredDate: [null as Date | null],
     preferredTime: [''],
     doshaType: [''],
   });
 
-  /** A past date cannot be booked: the field is cleared and a small popup says so. */
-  checkDate(): boolean {
-    const picked = this.form.value.preferredDate;
-    if (picked && picked < this.minDate) {
-      this.form.patchValue({ preferredDate: '' });
-      this.dialog.open(ConfirmDialogComponent, {
-        data: {
-          title: 'Date has passed',
-          message: 'You picked a date that is already over. Please choose today or a later date for your consultation.',
-          confirmLabel: 'OK, choose another date',
-          cancelLabel: 'Close',
-          icon: 'event_busy'
-        }
-      });
-      return false;
-    }
-    return true;
+  /** yyyy-MM-dd in the visitor's own calendar (toISOString would give the UTC day, which can be yesterday in India). */
+  private ymd(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   submit(): void {
     if (this.form.invalid) return;
-    if (!this.checkDate()) return;
     this.submitting.set(true);
     const v = this.form.value;
     this.api.post('consultation', {
       name: v.name, email: v.email, phone: v.phone, concern: v.concern,
-      preferredDate: v.preferredDate, preferredTime: v.preferredTime, doshaType: v.doshaType
+      preferredDate: v.preferredDate ? this.ymd(v.preferredDate as Date) : '', preferredTime: v.preferredTime, doshaType: v.doshaType
     }).subscribe({
       next: () => { this.submitting.set(false); this.submitted.set(true); },
       error: () => { this.submitting.set(false); this.snackBar.open('Booking failed. Please try again.', 'OK', { duration: 3000 }); }
