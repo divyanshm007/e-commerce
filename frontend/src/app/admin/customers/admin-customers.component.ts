@@ -136,7 +136,7 @@ interface Customer {
         filterDisplay="menu"
         (onFilter)="onTableFilter($event)"
         styleClass="cu-dt"
-        [tableStyle]="{'min-width':'750px'}"
+        [tableStyle]="{'width':'100%','table-layout':'fixed'}"
         [globalFilterFields]="['fullName', 'email', 'phone']"
       >
         <ng-template pTemplate="header">
@@ -147,7 +147,7 @@ interface Customer {
               <p-columnFilter type="text" field="fullName" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" />
             </th>
-            <th pSortableColumn="phone" style="width:130px">
+            <th pSortableColumn="phone" class="cu-hide-sm" style="width:130px">
               Phone <p-sortIcon field="phone" />
               <p-columnFilter type="text" field="phone" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" />
@@ -162,7 +162,7 @@ interface Customer {
               <p-columnFilter type="text" field="totalSpent" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" />
             </th>
-            <th pSortableColumn="createdAt" style="width:115px">
+            <th pSortableColumn="createdAt" class="cu-hide-sm" style="width:115px">
               Joined <p-sortIcon field="createdAt" />
               <p-columnFilter type="text" field="createdAt" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" />
@@ -190,13 +190,14 @@ interface Customer {
             <td>
               <div class="cu-name">{{ getFullName(c) }}</div>
               <div class="cu-email">{{ c.email }}</div>
+              <div class="cu-phone cu-show-sm">{{ c.phone }}</div>
             </td>
-            <td><span class="cu-phone">{{ c.phone || '—' }}</span></td>
+            <td class="cu-hide-sm"><span class="cu-phone">{{ c.phone || '—' }}</span></td>
             <td class="cu-td-center">
               <span class="cu-orders-badge">{{ c.ordersCount ?? 0 }}</span>
             </td>
             <td><span class="cu-spent">{{ (c.totalSpent ?? 0) | currency:'INR':'symbol':'1.0-0' }}</span></td>
-            <td><span class="cu-date">{{ c.createdAt | date:'dd MMM yyyy' }}</span></td>
+            <td class="cu-hide-sm"><span class="cu-date">{{ c.createdAt | date:'dd MMM yyyy' }}</span></td>
             <td>
               <span class="cu-badge" [class]="c.isActive !== false ? 'cu-active' : 'cu-inactive'">
                 <span class="cu-dot" [class]="c.isActive !== false ? 'cu-dot-active' : 'cu-dot-inactive'"></span>
@@ -452,10 +453,29 @@ interface Customer {
 .cu-empty-title { font-size: 13px; font-weight: 600; color: #334155; margin: 0 0 2px; }
 .cu-empty-sub   { font-size: 11px; color: #94A3B8; margin: 0; }
 
+.cu-show-sm { display: none; }
+.cu-email { overflow-wrap: anywhere; }
+
+/* tablet and phone: the same table, Phone and Joined fold away (phone shows under the name), so nothing scrolls sideways */
+@media (max-width: 960px) {
+  .cu-hide-sm { display: none !important; }
+  .cu-show-sm { display: block; font-size: 11px; color: #64748B; margin-top: 1px; }
+  .cu-dt .p-datatable-table { min-width: 0 !important; width: 100% !important; table-layout: fixed !important; }
+  .cu-dt .p-datatable-thead > tr > th { padding: 0 6px !important; }
+  .cu-dt .p-datatable-tbody > tr > td { padding: 8px 6px !important; }
+  .cu-dt .p-datatable-thead th svg.p-icon { display: none !important; }
+  .cu-dt th:nth-child(1) { width: 44px !important; }
+  .cu-dt th:nth-child(4) { width: 60px !important; }
+  .cu-dt th:nth-child(5) { width: 78px !important; }
+  .cu-dt th:nth-child(7) { width: 70px !important; }
+  .cu-dt th:nth-child(8) { width: 48px !important; }
+  .cu-table-card { overflow-x: hidden !important; }
+}
+
 @media (max-width: 768px) {
   .cu-page { padding: 14px; }
   .cu-kpi-row { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
-  .cu-table-card { min-width: 0; overflow-x: auto !important; }
+  .cu-table-card { min-width: 0; overflow-x: hidden !important; }
 }
 
 @media (max-width: 480px) {
@@ -491,12 +511,21 @@ export class AdminCustomersComponent implements OnInit {
 
   load() {
     this.loading.set(true);
-    this.api.get<any>('customers', { page: 1, pageSize: 500 }).subscribe({
+    this.loadPage(1, []);
+  }
+
+  /** The server returns at most 100 customers per page: keep asking until all of them are here. */
+  private loadPage(page: number, soFar: Customer[]): void {
+    this.api.get<any>('customers', { page, pageSize: 100 }).subscribe({
       next: res => {
         const data = res.data;
-        const items: Customer[] = (data && 'items' in data) ? data.items ?? [] : Array.isArray(data) ? data : [];
-        this.customers.set(items);
-        this.totalCount.set(data?.totalCount ?? items.length);
+        const raw: any[] = (data && 'items' in data) ? data.items ?? [] : Array.isArray(data) ? data : [];
+        const batch: Customer[] = raw.map(c => ({ ...c, ordersCount: c.ordersCount ?? c.orderCount ?? 0 }));
+        const all = [...soFar, ...batch];
+        const total = data?.totalCount ?? all.length;
+        if (batch.length > 0 && all.length < total) { this.loadPage(page + 1, all); return; }
+        this.customers.set(all);
+        this.totalCount.set(total);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)

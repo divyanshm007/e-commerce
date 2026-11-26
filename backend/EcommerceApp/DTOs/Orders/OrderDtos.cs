@@ -16,6 +16,22 @@ public class OrderListDto
     public DateTime CreatedAt { get; set; }
 }
 
+/// <summary>Sales figures for a date range, computed in the database over ALL matching orders.</summary>
+public class OrderReportDto
+{
+    public DateOnly? From { get; set; }
+    public DateOnly? To { get; set; }
+    /// <summary>Every order placed in the range, whatever its status.</summary>
+    public int OrdersCount { get; set; }
+    /// <summary>Orders that count towards revenue: everything except cancelled and returned orders.</summary>
+    public int CountedOrders { get; set; }
+    public decimal Revenue { get; set; }
+    public decimal AverageOrderValue { get; set; }
+    public int DeliveredCount { get; set; }
+    public int CancelledCount { get; set; }
+    public List<OrderListDto> TopOrders { get; set; } = [];
+}
+
 public class OrderDetailDto : OrderListDto
 {
     public Guid? UserId { get; set; }

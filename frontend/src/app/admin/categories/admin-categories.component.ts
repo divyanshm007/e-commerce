@@ -324,7 +324,7 @@ import { MediaUrlPipe } from '../../shared/pipes/media-url.pipe';
         <p-select [options]="parentOptions" formControlName="parentCategoryId"
           optionLabel="name" optionValue="id"
           placeholder="Root Category (no parent)"
-          [showClear]="true" styleClass="cat-dlg-sel" />
+          [showClear]="true" styleClass="cat-dlg-sel" panelStyleClass="cat-dlg-panel" />
       </div>
       <small class="cat-hint-msg">Leave empty to make this a top-level category</small>
     </div>
@@ -641,11 +641,17 @@ import { MediaUrlPipe } from '../../shared/pipes/media-url.pipe';
 .cat-select-wrap { position: relative; }
 .cat-select-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #94A3B8; z-index: 2; pointer-events: none; }
 .cat-dlg-sel { width: 100% !important; }
-.cat-dlg-sel .p-select { width: 100% !important; height: 36px !important; border: 1px solid #E2E8F0 !important; border-radius: 8px !important; background: #fff !important; font-size: 13px !important; box-shadow: none !important; padding-left: 30px !important; }
-.cat-dlg-sel .p-select:focus-within,
-.cat-dlg-sel .p-select.p-focus { border-color: #0F766E !important; box-shadow: 0 0 0 3px rgba(15,118,110,0.10) !important; }
-.cat-dlg-sel .p-select .p-select-label { font-size: 13px !important; color: #0F172A !important; line-height: 36px !important; padding: 0 8px !important; }
-.cat-dlg-sel .p-select .p-select-label.p-placeholder { color: #94A3B8 !important; }
+.cat-dlg-sel.p-select { width: 100% !important; height: 36px !important; border: 1px solid #E2E8F0 !important; border-radius: 8px !important; background: #fff !important; font-size: 13px !important; box-shadow: none !important; display: flex !important; align-items: center !important; }
+.cat-dlg-sel.p-select:focus-within,
+.cat-dlg-sel.p-select.p-focus { border-color: #0F766E !important; box-shadow: 0 0 0 3px rgba(15,118,110,0.10) !important; }
+/* left padding clears the sitemap icon that sits over the box; the text is the same small size as the other fields */
+.cat-dlg-sel .p-select-label { font-size: 13px !important; color: #0F172A !important; line-height: 34px !important; padding: 0 8px 0 34px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-dlg-sel .p-select-label.p-placeholder { color: #94A3B8 !important; }
+.cat-dlg-sel .p-select-dropdown { width: 32px !important; }
+.cat-dlg-sel .p-select-dropdown svg, .cat-dlg-sel .p-select-clear-icon { width: 12px !important; height: 12px !important; }
+/* the list that opens under the box (it is attached to the page, so it has its own class) */
+.cat-dlg-panel .p-select-option { font-size: 13px !important; padding: 8px 12px !important; line-height: 1.3 !important; }
+.cat-dlg-panel .p-select-list { padding: 4px !important; }
 
 /* Textarea */
 .cat-textarea {

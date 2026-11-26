@@ -172,7 +172,7 @@ public class FulfilmentService : IFulfilmentService
         string mode;
         try { mode = await _config.GetModeAsync(); } catch (DelhiveryConfigurationException) { mode = "invalid"; }
 
-        var states = await _db.OrderFulfilments.GroupBy(f => f.State).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.N);
+        var states = await OpenFulfilments().GroupBy(f => f.State).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.N);
         int St(string k) => states.TryGetValue(k, out var n) ? n : 0;
 
         return ApiResponse<FulfilmentDashboardDto>.Ok(new FulfilmentDashboardDto
@@ -181,11 +181,15 @@ public class FulfilmentService : IFulfilmentService
             AwaitingApproval = await AwaitingApprovalQuery().CountAsync(),
             ApprovedAwaitingShipment = St(FulfilmentStates.Approved) + St(FulfilmentStates.Creating),
             CreationFailures = await FailureOrderIds().CountAsync(),
-            InTransit = await _db.Shipments.CountAsync(s => s.CreationState == C.Created && !s.IsFinal),
+            InTransit = await _db.Shipments.CountAsync(s => s.CreationState == C.Created && !s.IsFinal && s.Order.Status != OrderStatus.Cancelled),
             Delivered = await _db.Shipments.CountAsync(s => s.Status == S.Delivered),
             Exceptions = St(FulfilmentStates.Exception)
         });
     }
+
+    /// <summary>Fulfilment rows of orders that are still alive: a cancelled or returned order is shown in the Orders list, not here.</summary>
+    private IQueryable<OrderFulfilment> OpenFulfilments() =>
+        _db.OrderFulfilments.Where(f => f.Order.Status != OrderStatus.Cancelled && f.Order.Status != OrderStatus.Returned);
 
     // orders that need a decision: not decided yet, still open, and either paid online or cash on delivery
     private IQueryable<Order> AwaitingApprovalQuery() =>
@@ -195,7 +199,7 @@ public class FulfilmentService : IFulfilmentService
 
     // an order whose latest creation attempt did not produce a shipment, or that is in the exception queue without one
     private IQueryable<Guid> FailureOrderIds() =>
-        _db.OrderFulfilments.Where(f => f.State == FulfilmentStates.Exception && !_db.Shipments.Any(s => s.OrderId == f.OrderId && s.CreationState == C.Created))
+        OpenFulfilments().Where(f => f.State == FulfilmentStates.Exception && !_db.Shipments.Any(s => s.OrderId == f.OrderId && s.CreationState == C.Created))
             .Select(f => f.OrderId);
 
     public async Task<ApiResponse<PagedResult<FulfilmentRowDto>>> ListAsync(string kind, int page, int pageSize)
@@ -206,11 +210,11 @@ public class FulfilmentService : IFulfilmentService
         IQueryable<Guid> orderIds = kind switch
         {
             "awaiting-approval" => AwaitingApprovalQuery().OrderBy(o => o.CreatedAt).Select(o => o.Id),
-            "awaiting-shipment" => _db.OrderFulfilments.Where(f => f.State == FulfilmentStates.Approved || f.State == FulfilmentStates.Creating).OrderBy(f => f.ApprovedAt).Select(f => f.OrderId),
+            "awaiting-shipment" => OpenFulfilments().Where(f => f.State == FulfilmentStates.Approved || f.State == FulfilmentStates.Creating).OrderBy(f => f.ApprovedAt).Select(f => f.OrderId),
             "creation-failures" => FailureOrderIds(),
-            "in-transit" => _db.Shipments.Where(s => s.CreationState == C.Created && !s.IsFinal).OrderByDescending(s => s.LastEventAt ?? s.CreatedAt).Select(s => s.OrderId),
+            "in-transit" => _db.Shipments.Where(s => s.CreationState == C.Created && !s.IsFinal && s.Order.Status != OrderStatus.Cancelled).OrderByDescending(s => s.LastEventAt ?? s.CreatedAt).Select(s => s.OrderId),
             "delivered" => _db.Shipments.Where(s => s.Status == S.Delivered).OrderByDescending(s => s.LastEventAt ?? s.CreatedAt).Select(s => s.OrderId),
-            _ => _db.OrderFulfilments.Where(f => f.State == FulfilmentStates.Exception).OrderBy(f => f.UpdatedAt).Select(f => f.OrderId)
+            _ => OpenFulfilments().Where(f => f.State == FulfilmentStates.Exception).OrderBy(f => f.UpdatedAt).Select(f => f.OrderId)
         };
 
         var total = await orderIds.CountAsync();

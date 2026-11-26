@@ -137,7 +137,12 @@ public class FulfilmentProcessor
 
         // the order may have been cancelled between approval and now
         if (order.Status is OrderStatus.Cancelled or OrderStatus.Returned)
-        { await ToException(f, "The order was cancelled or returned after approval; no shipment was created.", null, now, ct); return; }
+        {
+            f.State = FulfilmentStates.Completed; f.LeaseUntil = null; f.AttentionReason = null; f.UpdatedAt = now;
+            f.LastError = "Order was cancelled or returned before dispatch; no shipment was created.";
+            await _db.SaveChangesAsync(ct);
+            return;
+        }
 
         var existing = await _db.Shipments.Where(s => s.OrderId == order.Id).ToListAsync(ct);
         if (existing.Any(s => s.CreationState == C.Created))

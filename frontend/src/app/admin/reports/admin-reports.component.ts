@@ -75,6 +75,10 @@ import { OrderList, OrderStatus } from '../../core/models/order.models';
     }
   </div>
 
+  <p class="rp-range-note" *ngIf="!loading()">
+    Showing {{ rangeNote() }} (India time). Revenue and average exclude cancelled and returned orders<span *ngIf="cancelledCount() > 0"> ({{ cancelledCount() }} cancelled in this period)</span>.
+  </p>
+
   <!-- Top Orders Table -->
   @if (!loading()) {
     <div class="rp-table-card">
@@ -149,6 +153,7 @@ import { OrderList, OrderStatus } from '../../core/models/order.models';
 .rp-filter-row  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .rp-filter-group { display: flex; align-items: center; gap: 7px; }
 .rp-filter-lbl  { font-size: 10.5px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+.rp-range-note { font-size: 12.5px; color: #64748B; margin: -4px 4px 14px; }
 .rp-filter-sep  { font-size: 13px; color: #CBD5E1; }
 .rp-date-inp    { height: 34px; border: 1px solid #E2E8F0; border-radius: 7px; padding: 0 10px; font-size: 12.5px; color: #0F172A; background: #F8FAFC; outline: none; }
 .rp-date-inp:focus { border-color: #0F766E; box-shadow: 0 0 0 3px rgba(15,118,110,0.10); }
@@ -233,37 +238,47 @@ export class AdminReportsComponent implements OnInit {
   topOrders     = signal<OrderList[]>([]);
 
   fromDate = this.thirtyDaysAgo();
-  toDate   = new Date().toISOString().slice(0, 10);
+  toDate   = this.today();
+  cancelledCount = signal(0);
+  rangeNote = signal('');
 
   ngOnInit(): void { this.loadReports(); }
+
+  /** A calendar day in the admin's own time zone (toISOString would give the UTC day, which can be yesterday in India). */
+  private ymd(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  today(): string { return this.ymd(new Date()); }
 
   thirtyDaysAgo(): string {
     const d = new Date();
     d.setDate(d.getDate() - 30);
-    return d.toISOString().slice(0, 10);
+    return this.ymd(d);
   }
 
   resetFilter(): void {
     this.fromDate = this.thirtyDaysAgo();
-    this.toDate   = new Date().toISOString().slice(0, 10);
+    this.toDate   = this.today();
     this.loadReports();
   }
 
   loadReports(): void {
+    // a reversed range is swapped, so "from" is never after "to"
+    if (this.fromDate && this.toDate && this.fromDate > this.toDate) [this.fromDate, this.toDate] = [this.toDate, this.fromDate];
     this.loading.set(true);
-    const params: any = { page: 1, pageSize: 500, sortBy: 'totalAmount', sortDirection: 'desc' };
-    if (this.fromDate) params.from = new Date(this.fromDate).toISOString();
-    if (this.toDate)   params.to   = new Date(this.toDate).toISOString();
 
-    this.orderService.getAll(params).subscribe({
+    // the totals are worked out by the server over ALL orders in the range (the old page only saw the first 100)
+    this.orderService.getReport(this.fromDate, this.toDate).subscribe({
       next: res => {
-        const items = res.data?.items ?? [];
-        this.ordersCount.set(res.data?.totalCount ?? items.length);
-        const rev = items.reduce((s, o) => s + (o.totalAmount ?? 0), 0);
-        this.totalRevenue.set(rev);
-        this.avgOrderValue.set(items.length ? rev / items.length : 0);
-        this.deliveredCount.set(items.filter(o => o.status === OrderStatus.Delivered).length);
-        this.topOrders.set([...items].sort((a, b) => b.totalAmount - a.totalAmount).slice(0, 10));
+        const r = res.data;
+        this.ordersCount.set(r?.ordersCount ?? 0);
+        this.totalRevenue.set(r?.revenue ?? 0);
+        this.avgOrderValue.set(r?.averageOrderValue ?? 0);
+        this.deliveredCount.set(r?.deliveredCount ?? 0);
+        this.cancelledCount.set(r?.cancelledCount ?? 0);
+        this.topOrders.set(r?.topOrders ?? []);
+        this.rangeNote.set(`${this.fromDate || 'the beginning'} to ${this.toDate || 'today'}`);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)

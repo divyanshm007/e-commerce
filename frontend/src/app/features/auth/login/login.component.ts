@@ -376,6 +376,7 @@ function passwordMatch(control: AbstractControl) {
     /* ── Responsive ── */
     @media (max-width: 900px) {
       /* the page must be able to scroll on a phone, and the form must come first: the marketing panel shrinks to a header */
+      :host { height: auto; min-height: 100vh; overflow: visible; }      /* the host itself was cut to one screen, which hid the rest of the sign-up form */
       .login-page { height: auto; min-height: 100vh; overflow: visible; align-items: flex-start; }
       .login-container { flex-direction: column; max-width: 520px; height: auto; max-height: none; min-height: auto; border-radius: 20px; }
       .brand-panel { flex: none; padding: 22px 24px 22px; }
@@ -385,7 +386,7 @@ function passwordMatch(control: AbstractControl) {
       .brand-subtext { font-size: 13.5px; }
       .features-grid, .product-composition, .brand-footer { display: none; }
       .form-panel { flex: none; }
-      .form-wrap { padding: 20px 28px 28px; }
+      .form-wrap { padding: 20px 28px 28px; overflow-y: visible; }
     }
     @media (max-width: 540px) {
       .login-page { padding: 0; }

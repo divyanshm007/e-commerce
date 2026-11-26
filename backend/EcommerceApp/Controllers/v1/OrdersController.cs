@@ -105,6 +105,12 @@ public class OrdersController : BaseController
         return File(result.Data!, "application/pdf", $"invoice-{id}.pdf");
     }
 
+    /// <summary>Reports page: totals for a date range (yyyy-MM-dd, India calendar days). Admin only.</summary>
+    [HttpGet("report")]
+    [Authorize(Roles = "SuperAdmin")]
+    public async Task<IActionResult> GetReport([FromQuery] DateOnly? from, [FromQuery] DateOnly? to) =>
+        ApiResult(await _orderService.GetReportAsync(from, to));
+
     [HttpGet("stats")]
     [Authorize(Roles = "SuperAdmin")]
     public async Task<IActionResult> GetStats() =>

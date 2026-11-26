@@ -20,6 +20,12 @@ public class CustomersController : BaseController
         _db = db;
     }
 
+    /// <summary>What a customer has spent: orders that were paid online or delivered (cash on delivery), never cancelled or returned ones.</summary>
+    private static decimal Spent(IEnumerable<Order> orders) =>
+        orders.Where(o => o.Status != Domain.Enums.OrderStatus.Cancelled && o.Status != Domain.Enums.OrderStatus.Returned &&
+                          (o.PaymentStatus == Domain.Enums.PaymentStatus.Paid || o.Status == Domain.Enums.OrderStatus.Delivered))
+              .Sum(o => o.TotalAmount);
+
     // Admin: list all customers
     [HttpGet]
     [Authorize(Roles = "SuperAdmin")]
@@ -50,16 +56,16 @@ public class CustomersController : BaseController
             Email = u.Email,
             Phone = u.Phone,
             OrderCount = u.Orders.Count,
-            TotalSpent = u.Orders.Where(o => o.PaymentStatus == Domain.Enums.PaymentStatus.Paid).Sum(o => o.TotalAmount),
+            TotalSpent = Spent(u.Orders),
             CreatedAt = u.CreatedAt,
             LastLoginAt = u.LastLoginAt,
             IsActive = u.IsActive
         }).ToList();
 
-        return Ok(new PagedResult<CustomerListDto>
+        return ApiResult(ApiResponse<PagedResult<CustomerListDto>>.Ok(new PagedResult<CustomerListDto>
         {
             Items = dtos, TotalCount = total, Page = paging.Page, PageSize = paging.PageSize
-        });
+        }));
     }
 
     // Admin: get customer detail
@@ -73,16 +79,16 @@ public class CustomersController : BaseController
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == id);
 
-        if (user == null) return NotFound();
+        if (user == null) return NotFound(ApiResponse<CustomerDetailDto>.NotFound("Customer not found."));
 
-        return Ok(new CustomerDetailDto
+        return ApiResult(ApiResponse<CustomerDetailDto>.Ok(new CustomerDetailDto
         {
             Id = user.Id,
             FullName = $"{user.FirstName} {user.LastName}",
             Email = user.Email,
             Phone = user.Phone,
             OrderCount = user.Orders.Count,
-            TotalSpent = user.Orders.Where(o => o.PaymentStatus == Domain.Enums.PaymentStatus.Paid).Sum(o => o.TotalAmount),
+            TotalSpent = Spent(user.Orders),
             CreatedAt = user.CreatedAt,
             LastLoginAt = user.LastLoginAt,
             IsActive = user.IsActive,
@@ -101,7 +107,7 @@ public class CustomersController : BaseController
                     Id = o.Id, OrderNumber = o.OrderNumber,
                     TotalAmount = o.TotalAmount, Status = o.Status, CreatedAt = o.CreatedAt
                 }).ToList()
-        });
+        }));
     }
 
     [HttpPatch("{id:guid}/toggle-active")]
@@ -109,17 +115,17 @@ public class CustomersController : BaseController
     public async Task<IActionResult> ToggleActive(Guid id)
     {
         var user = await _db.Users.FindAsync(id);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound(ApiResponse<object>.NotFound("Customer not found."));
         user.IsActive = !user.IsActive;
         await _db.SaveChangesAsync();
-        return Ok(new { isActive = user.IsActive });
+        return ApiResult(ApiResponse<object>.Ok(new { isActive = user.IsActive }));
     }
 
     // Customer: manage their own addresses
     [HttpGet("addresses")]
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetAddresses() =>
-        Ok(await _db.Addresses.Where(a => a.UserId == CurrentUserId).ToListAsync());
+        ApiResult(ApiResponse<List<Address>>.Ok(await _db.Addresses.Where(a => a.UserId == CurrentUserId).ToListAsync()));
 
     [HttpPost("addresses")]
     [Authorize(Roles = "Customer")]
@@ -145,7 +151,7 @@ public class CustomersController : BaseController
 
         await _db.Addresses.AddAsync(address);
         await _db.SaveChangesAsync();
-        return Ok(address);
+        return ApiResult(ApiResponse<Address>.Ok(address));
     }
 
     [HttpDelete("addresses/{addressId:guid}")]
@@ -154,9 +160,9 @@ public class CustomersController : BaseController
     {
         var address = await _db.Addresses.FirstOrDefaultAsync(a =>
             a.Id == addressId && a.UserId == CurrentUserId);
-        if (address == null) return NotFound();
+        if (address == null) return NotFound(ApiResponse<object>.NotFound("Address not found."));
         _db.Addresses.Remove(address);
         await _db.SaveChangesAsync();
-        return Ok();
+        return ApiResult(ApiResponse<object>.Ok(new { }, "Address removed."));
     }
 }

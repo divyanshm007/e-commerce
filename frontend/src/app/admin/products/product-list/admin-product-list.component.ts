@@ -146,17 +146,17 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
         filterDisplay="menu"
         (onFilter)="onTableFilter($event)"
         styleClass="pl-dt"
-        [tableStyle]="{'min-width':'760px'}"
+        [tableStyle]="{'width':'100%','table-layout':'fixed'}"
       >
         <ng-template pTemplate="header">
           <tr>
-            <th style="width:54px">Image</th>
+            <th style="width:60px">Image</th>
             <th pSortableColumn="name">
               Name <p-sortIcon field="name" />
               <p-columnFilter type="text" field="name" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" />
             </th>
-            <th pSortableColumn="categoryName" style="width:130px">
+            <th pSortableColumn="categoryName" style="width:15%">
               Category <p-sortIcon field="categoryName" />
               <p-columnFilter field="categoryName" matchMode="equals" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
@@ -167,17 +167,17 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                 </ng-template>
               </p-columnFilter>
             </th>
-            <th pSortableColumn="price" style="width:110px">
+            <th pSortableColumn="price" style="width:96px">
               Price <p-sortIcon field="price" />
               <p-columnFilter type="text" field="price" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" />
             </th>
-            <th pSortableColumn="stockQuantity" style="width:80px">
+            <th pSortableColumn="stockQuantity" style="width:76px">
               Stock <p-sortIcon field="stockQuantity" />
               <p-columnFilter type="text" field="stockQuantity" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" />
             </th>
-            <th pSortableColumn="isActive" style="width:100px">
+            <th pSortableColumn="isActive" style="width:104px">
               Status <p-sortIcon field="isActive" />
               <p-columnFilter field="isActive" matchMode="equals" display="menu"
                 [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
@@ -188,20 +188,21 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                 </ng-template>
               </p-columnFilter>
             </th>
-            <th style="width:90px" class="pl-th-center">Actions</th>
+            <th style="width:84px" class="pl-th-center">Actions</th>
           </tr>
         </ng-template>
 
         <ng-template pTemplate="body" let-p>
           <tr>
-            <td>
+            <td data-label="Image">
               <div class="pl-thumb">
                 <img *ngIf="p.primaryImageUrl" [src]="p.primaryImageUrl | mediaUrl" [alt]="p.name" />
                 <i *ngIf="!p.primaryImageUrl" class="pi pi-image"></i>
               </div>
             </td>
-            <td>
+            <td data-label="Product">
               <div class="pl-prod-name">{{ p.name }}</div>
+              <div class="pl-cat-inline" *ngIf="p.categoryName">{{ p.categoryName }}</div>
               <div class="pl-badges">
                 <span class="pl-pb pl-pb-feat" *ngIf="p.isFeatured">Featured</span>
                 <span class="pl-pb pl-pb-new"  *ngIf="p.isNewArrival">New</span>
@@ -209,15 +210,15 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                 <span class="pl-pb pl-pb-rx"   *ngIf="p.prescriptionRequired">Rx</span>
               </div>
             </td>
-            <td>
+            <td data-label="Category">
               <span class="pl-cat-tag" *ngIf="p.categoryName">{{ p.categoryName }}</span>
               <span class="pl-no-val" *ngIf="!p.categoryName">—</span>
             </td>
-            <td>
+            <td data-label="Price">
               <div class="pl-price">{{ p.price | currency:'INR':'symbol':'1.0-0' }}</div>
               <div class="pl-disc" *ngIf="p.discountPrice">{{ p.discountPrice | currency:'INR':'symbol':'1.0-0' }}</div>
             </td>
-            <td>
+            <td data-label="Stock">
               <span class="pl-stock"
                 [class.pl-stock-out]="p.stockQuantity === 0"
                 [class.pl-stock-low]="p.stockQuantity > 0 && p.stockQuantity <= 10"
@@ -225,7 +226,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                 {{ p.stockQuantity === 0 ? 'Out' : p.stockQuantity }}
               </span>
             </td>
-            <td>
+            <td data-label="Status">
               <button class="pl-status-pill"
                 [class.pl-status-active]="p.isActive"
                 [class.pl-status-inactive]="!p.isActive"
@@ -233,10 +234,10 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
                 [pTooltip]="p.isActive ? 'Click to deactivate' : 'Click to activate'"
                 tooltipPosition="top">
                 <span class="pl-status-dot"></span>
-                {{ p.isActive ? 'Active' : 'Inactive' }}
+                <span class="pl-status-txt">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
               </button>
             </td>
-            <td>
+            <td data-label="Actions">
               <div class="pl-actions">
                 <a class="pl-act-btn pl-act-edit" [routerLink]="['/admin/products', p.id, 'edit']"
                   pTooltip="Edit" tooltipPosition="top">
@@ -451,7 +452,7 @@ app-admin-product-list { display: block; width: 100%; }
 .pl-thumb .pi { color: #CBD5E1; font-size: 16px; }
 
 /* Product name cell */
-.pl-prod-name { font-size: 13px; font-weight: 500; color: #0F172A; line-height: 1.3; white-space: nowrap; }
+.pl-prod-name { font-size: 13px; font-weight: 500; color: #0F172A; line-height: 1.3; white-space: normal; overflow-wrap: anywhere; }
 .pl-badges    { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 2px; }
 .pl-pb { font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; }
 .pl-pb-feat { background: #EFF6FF; color: #1D4ED8; }
@@ -460,7 +461,7 @@ app-admin-product-list { display: block; width: 100%; }
 .pl-pb-rx   { background: #FEF2F2; color: #DC2626; }
 
 /* Category tag */
-.pl-cat-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; background: #F1F5F9; color: #475569; font-size: 11px; font-weight: 500; }
+.pl-cat-tag { display: inline-block; max-width: 100%; overflow-wrap: anywhere; padding: 2px 7px; border-radius: 4px; background: #F1F5F9; color: #475569; font-size: 11px; font-weight: 500; }
 .pl-no-val  { color: #94A3B8; }
 
 /* Price */
@@ -512,11 +513,45 @@ app-admin-product-list { display: block; width: 100%; }
 .pl-empty-title { font-size: 13px; font-weight: 600; color: #334155; margin: 0 0 2px; }
 .pl-empty-sub   { font-size: 11px; color: #94A3B8; margin: 0; }
 
+.pl-cat-inline { display: none; font-size: 10.5px; color: #64748B; margin-top: 1px; }
+
+/* tablet and below: same table, smaller type and padding so every column still fits */
+@media (max-width: 1024px) {
+  /* the shared admin styles give every table a 600px minimum, which is what made this one scroll sideways */
+  .pl-dt .p-datatable-table { min-width: 0 !important; width: 100% !important; table-layout: fixed !important; }
+  .pl-dt .p-datatable-thead > tr > th { padding: 0 6px !important; font-size: 9.5px !important; height: 38px !important; }
+  .pl-dt .p-datatable-tbody > tr > td { padding: 7px 6px !important; height: auto !important; }
+  .pl-dt .p-datatable-thead th svg.p-icon { display: none !important; }
+  .pl-thumb { width: 34px; height: 34px; }
+  .pl-prod-name { font-size: 12px; }
+  .pl-cat-tag { font-size: 10px; padding: 1px 5px; }
+  .pl-price { font-size: 12px; }
+  .pl-disc { font-size: 10px; }
+  .pl-status-pill { padding: 3px 7px !important; font-size: 10.5px !important; }
+  .pl-act-btn { width: 24px !important; height: 24px !important; }
+  .pl-actions { gap: 3px !important; }
+}
+
+/* phone and small tablet (the admin side menu takes a third of the width): the Category column folds under the name and Status shows only its coloured dot, so the other columns still fit */
+@media (max-width: 960px) {
+  .pl-dt .p-datatable-thead > tr > th:nth-child(3),
+  .pl-dt .p-datatable-tbody > tr > td:nth-child(3) { display: none !important; }
+  .pl-cat-inline { display: block; }
+  .pl-status-txt { display: none; }
+  .pl-status-pill { padding: 5px !important; min-width: 0 !important; }
+  .pl-dt .p-datatable-thead > tr > th:nth-child(1) { width: 44px !important; }
+  .pl-dt .p-datatable-thead > tr > th:nth-child(4) { width: 62px !important; }
+  .pl-dt .p-datatable-thead > tr > th:nth-child(5) { width: 46px !important; }
+  .pl-dt .p-datatable-thead > tr > th:nth-child(6) { width: 38px !important; }
+  .pl-dt .p-datatable-thead > tr > th:nth-child(7) { width: 58px !important; }
+  .pl-actions { flex-direction: column; align-items: center; }
+}
+
 @media (max-width: 768px) {
   .pl-page { padding: 14px; overflow-x: hidden; }
   .pl-page-header { flex-wrap: wrap; gap: 10px; }
   .pl-kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
-  .pl-table-card { min-width: 0; overflow-x: auto !important; }
+  .pl-table-card { min-width: 0; overflow-x: hidden !important; }
   .pl-search-wrap { min-width: 160px; }
 }
 

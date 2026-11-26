@@ -36,6 +36,39 @@ public class OrderService : IOrderService
             .Include(o => o.Payments)
             .AsNoTracking();
 
+    public async Task<ApiResponse<OrderReportDto>> GetReportAsync(DateOnly? from, DateOnly? to)
+    {
+        if (from != null && to != null && from > to) (from, to) = (to, from);                 // a reversed range is read the way it was meant
+
+        var ist = TimeSpan.FromMinutes(330);
+        IQueryable<Order> Filter(IQueryable<Order> q)
+        {
+            if (from != null) { var start = DateTime.SpecifyKind(from.Value.ToDateTime(TimeOnly.MinValue) - ist, DateTimeKind.Utc); q = q.Where(o => o.CreatedAt >= start); }
+            if (to != null) { var end = DateTime.SpecifyKind(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue) - ist, DateTimeKind.Utc); q = q.Where(o => o.CreatedAt < end); }
+            return q;
+        }
+
+        var inRange = Filter(_db.Orders.AsNoTracking());
+        var counted = inRange.Where(o => o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Returned);
+
+        var ordersCount = await inRange.CountAsync();
+        var countedOrders = await counted.CountAsync();
+        var revenue = await counted.SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+        var delivered = await inRange.CountAsync(o => o.Status == OrderStatus.Delivered);
+        var cancelled = await inRange.CountAsync(o => o.Status == OrderStatus.Cancelled);
+
+        var topIds = await counted.OrderByDescending(o => o.TotalAmount).Take(10).Select(o => o.Id).ToListAsync();
+        var top = await BaseQuery().Where(o => topIds.Contains(o.Id)).ToListAsync();
+
+        return ApiResponse<OrderReportDto>.Ok(new OrderReportDto
+        {
+            From = from, To = to, OrdersCount = ordersCount, CountedOrders = countedOrders, Revenue = revenue,
+            AverageOrderValue = countedOrders > 0 ? Math.Round(revenue / countedOrders, 2) : 0m,
+            DeliveredCount = delivered, CancelledCount = cancelled,
+            TopOrders = _mapper.Map<List<OrderListDto>>(top.OrderByDescending(o => o.TotalAmount).ToList())
+        });
+    }
+
     public async Task<ApiResponse<PagedResult<OrderListDto>>> GetAllAsync(PaginationParams paging)
     {
         var query = BaseQuery();
@@ -436,6 +469,11 @@ public class OrderService : IOrderService
                     .SetProperty(p => p.SoldCount, p => p.SoldCount > qty ? p.SoldCount - qty : 0)
                     .SetProperty(p => p.UpdatedAt, now));
         }
+
+        // the order is cancelled, so its dispatch workflow (approved / failed / needs attention) is closed: nothing will be shipped
+        await _db.OrderFulfilments.Where(f => f.OrderId == id && f.State != FulfilmentStates.Completed && f.State != FulfilmentStates.Rejected)
+            .ExecuteUpdateAsync(f => f.SetProperty(x => x.State, FulfilmentStates.Completed).SetProperty(x => x.LeaseUntil, (DateTime?)null)
+                .SetProperty(x => x.AttentionReason, (string?)null).SetProperty(x => x.LastError, "Order was cancelled before dispatch.").SetProperty(x => x.UpdatedAt, now));
 
         await tx.CommitAsync();
 

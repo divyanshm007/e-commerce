@@ -587,6 +587,60 @@ public class FulfilmentTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task A_cancelled_order_is_not_shown_in_any_fulfilment_queue_and_its_dispatch_is_closed()
+    {
+        // 1) cancelled before anyone approved it: never in the approval queue
+        await using (var d = _t.NewContext())
+        {
+            var u = await Seed.UserAsync(d, "Canc1"); var p = await Seed.ProductAsync(d);
+            var o = await Seed.OrderAsync(d, p, u.Id);
+            var svc = new FulfilmentService(d, new FakeDelhiveryConfig(), new NoSignal());
+            Assert.Contains((await svc.ListAsync("awaiting-approval", 1, 50)).Data!.Items, r => r.OrderId == o.Id);
+            Assert.True((await Seed.OrderService(d).CancelAsync(o.Id, "changed mind", u.Id, false)).Success);
+            Assert.DoesNotContain((await svc.ListAsync("awaiting-approval", 1, 50)).Data!.Items, r => r.OrderId == o.Id);
+        }
+
+        // 2) approved, then cancelled before the shipment was created: its row is closed, not left waiting or turned into an exception
+        var (order, _) = await ApprovedOrderAsync();
+        await using (var d = _t.NewContext())
+        {
+            var svc = new FulfilmentService(d, new FakeDelhiveryConfig(), new NoSignal());
+            Assert.Contains((await svc.ListAsync("awaiting-shipment", 1, 50)).Data!.Items, r => r.OrderId == order.Id);
+            var before = (await svc.GetDashboardAsync()).Data!.ApprovedAwaitingShipment;
+
+            var owner = await d.Orders.AsNoTracking().Where(x => x.Id == order.Id).Select(x => x.UserId).SingleAsync();
+            Assert.True((await Seed.OrderService(d).CancelAsync(order.Id, "no longer needed", owner, false)).Success);
+
+            Assert.DoesNotContain((await svc.ListAsync("awaiting-shipment", 1, 50)).Data!.Items, r => r.OrderId == order.Id);
+            Assert.Equal(before - 1, (await svc.GetDashboardAsync()).Data!.ApprovedAwaitingShipment);
+        }
+        Assert.Equal(FulfilmentStates.Completed, (await FulfilmentOf(order.Id)).State);
+
+        // the worker finds nothing to do for it: no request to Delhivery, no shipment, no exception
+        var rig = CreatingRig();
+        await using (var d = _t.NewContext()) await rig.RunAllAsyncForTest(d, Now);
+        Assert.Equal(0, rig.CreateCalls);
+        Assert.Empty(await ShipmentsOf(order.Id));
+        Assert.Equal(FulfilmentStates.Completed, (await FulfilmentOf(order.Id)).State);
+    }
+
+    [Fact]
+    public async Task An_order_cancelled_in_the_database_after_approval_is_closed_by_the_worker_not_sent_as_an_exception()
+    {
+        var (order, _) = await ApprovedOrderAsync();
+        await using (var d = _t.NewContext()) { var o = await d.Orders.SingleAsync(x => x.Id == order.Id); o.Status = OrderStatus.Cancelled; await d.SaveChangesAsync(); }
+
+        var rig = CreatingRig();
+        await using (var d = _t.NewContext()) await rig.Processor(d).RunCreationAsync("test", Now);
+        Assert.Equal(0, rig.CreateCalls);
+        var f = await FulfilmentOf(order.Id);
+        Assert.Equal(FulfilmentStates.Completed, f.State); Assert.Null(f.AttentionReason);
+
+        await using var c = _t.NewContext();
+        Assert.DoesNotContain((await new FulfilmentService(c, new FakeDelhiveryConfig(), new NoSignal()).ListAsync("exceptions", 1, 50)).Data!.Items, r => r.OrderId == order.Id);
+    }
+
+    [Fact]
     public async Task Queues_and_dashboard_reflect_the_workflow()
     {
         var before = (await Dash()).Data!;

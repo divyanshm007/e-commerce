@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { ApiResponse, PagedResult, PaginationParams } from '../models/api.models';
-import { OrderList, OrderDetail, CreateOrderDto, UpdateOrderStatusDto, CustomerAddress } from '../models/order.models';
+import { OrderReport, OrderList, OrderDetail, CreateOrderDto, UpdateOrderStatusDto, CustomerAddress } from '../models/order.models';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -10,6 +10,14 @@ export class OrderService {
 
   getAll(params: PaginationParams): Observable<ApiResponse<PagedResult<OrderList>>> {
     return this.api.get<PagedResult<OrderList>>('orders', params as any);
+  }
+
+  /** Sales totals for the Reports page: from / to are yyyy-MM-dd calendar days. */
+  getReport(from?: string, to?: string): Observable<ApiResponse<OrderReport>> {
+    const params: Record<string, string> = {};
+    if (from) params['from'] = from;
+    if (to) params['to'] = to;
+    return this.api.get<OrderReport>('orders/report', params);
   }
 
   getById(id: string): Observable<ApiResponse<OrderDetail>> {

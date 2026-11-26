@@ -6,6 +6,9 @@ namespace EcommerceApp.Application.Interfaces;
 public interface IOrderService
 {
     Task<ApiResponse<PagedResult<OrderListDto>>> GetAllAsync(PaginationParams paging);
+
+    /// <summary>Totals for the Reports page. Dates are calendar days in India time, both ends included; either may be omitted.</summary>
+    Task<ApiResponse<OrderReportDto>> GetReportAsync(DateOnly? from, DateOnly? to);
     Task<ApiResponse<OrderDetailDto>> GetByIdAsync(Guid id);
     /// <summary>The order only if the caller owns it or is SuperAdmin; otherwise the same "not found" answer as a missing order.</summary>
     Task<ApiResponse<OrderDetailDto>> GetByIdForCallerAsync(Guid id, Guid? callerId, bool callerIsAdmin);

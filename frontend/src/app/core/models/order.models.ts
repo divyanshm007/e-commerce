@@ -71,6 +71,18 @@ export interface PaymentSummary {
   refundStatus: RefundStatus;
 }
 
+export interface OrderReport {
+  from?: string | null;
+  to?: string | null;
+  ordersCount: number;
+  countedOrders: number;
+  revenue: number;
+  averageOrderValue: number;
+  deliveredCount: number;
+  cancelledCount: number;
+  topOrders: OrderList[];
+}
+
 export interface OrderList {
   id: string;
   orderNumber: string;
