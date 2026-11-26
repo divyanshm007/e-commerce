@@ -93,6 +93,7 @@ export const routes: Routes = [
       { path: 'orders/:id', loadComponent: () => import('./admin/orders/admin-order-detail.component').then(m => m.AdminOrderDetailComponent) },
       { path: 'cancel-requests', loadComponent: () => import('./admin/cancel-requests/admin-cancel-requests.component').then(m => m.AdminCancelRequestsComponent) },
       { path: 'fulfilment', loadComponent: () => import('./admin/fulfilment/admin-fulfilment.component').then(m => m.AdminFulfilmentComponent) },
+      { path: 'customers/:id', loadComponent: () => import('./admin/customers/admin-customer-detail.component').then(m => m.AdminCustomerDetailComponent) },
       { path: 'customers', loadComponent: () => import('./admin/customers/admin-customers.component').then(m => m.AdminCustomersComponent) },
       { path: 'reviews', loadComponent: () => import('./admin/reviews/admin-reviews.component').then(m => m.AdminReviewsComponent) },
       { path: 'coupons', loadComponent: () => import('./admin/coupons/admin-coupons.component').then(m => m.AdminCouponsComponent) },
