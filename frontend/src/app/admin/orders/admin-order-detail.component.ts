@@ -210,7 +210,8 @@ import { OrderShipmentCardComponent } from './order-shipment-card.component';
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">Tracking Number</label>
-              <input pInputText formControlName="trackingNumber" class="w-full" placeholder="Tracking no." />
+              <input pInputText class="w-full" readonly [value]="order()?.trackingNumber || ''" placeholder="Filled automatically after dispatch" />
+              <p class="text-xs text-slate-600 mt-1 mb-0">Set automatically when the shipment is created.</p>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">Notes</label>
@@ -331,7 +332,7 @@ export class AdminOrderDetailComponent implements OnInit {
   updateStatus(): void {
     if (this.statusForm.invalid) return;
     this.updating.set(true);
-    this.orderSvc.updateStatus(this.orderId, this.statusForm.getRawValue() as any).subscribe({
+    this.orderSvc.updateStatus(this.orderId, (({ trackingNumber, ...rest }) => rest)(this.statusForm.getRawValue()) as any).subscribe({
       next: res => {
         this.order.set((res.data as OrderDetail | null) ?? this.order());
         this.toast.add({ severity: 'success', summary: 'Updated', detail: 'Order status updated', life: 2500 });
