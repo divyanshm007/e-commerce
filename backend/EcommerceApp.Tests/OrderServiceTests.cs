@@ -290,7 +290,7 @@ public class OrderServiceTests : IClassFixture<DbFixture>
             await svc.TrackGuestOrderAsync(guestOrder.OrderNumber, "someone.else@example.test"),     // right order, wrong e-mail
             await svc.TrackGuestOrderAsync(guestOrder.OrderNumber, "9123456780"),                    // right order, wrong phone
             await svc.TrackGuestOrderAsync("ORD-20260101-ZZZZZZ", "buyer@example.test"),             // no such order
-            await svc.TrackGuestOrderAsync(memberOrder.OrderNumber, member.Email),                   // a member's order is not guest-visible
+            await svc.TrackGuestOrderAsync(memberOrder.OrderNumber, "stranger@example.test"),        // a member's order with someone else's e-mail
             await svc.TrackGuestOrderAsync(guestOrder.OrderNumber, ""),                              // nothing supplied
             await svc.TrackGuestOrderAsync("", "buyer@example.test"),
         };

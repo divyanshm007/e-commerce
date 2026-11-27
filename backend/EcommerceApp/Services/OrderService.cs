@@ -131,19 +131,22 @@ public class OrderService : IOrderService
 
     public async Task<ApiResponse<OrderTrackingDto>> TrackGuestOrderAsync(string orderNumber, string contact)
     {
-        // one answer for every failure (no such order, member order, wrong contact) so nothing can be probed
+        // one answer for every failure (no such order, wrong contact) so nothing can be probed
         var generic = ApiResponse<OrderTrackingDto>.NotFound("We couldn't find an order matching these details.");
         if (string.IsNullOrWhiteSpace(orderNumber) || string.IsNullOrWhiteSpace(contact)) return generic;
 
         var number = orderNumber.Trim().ToUpperInvariant();
-        var order = await _db.Orders.AsNoTracking().Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.OrderNumber == number && o.UserId == null);
+        // any order, placed as a guest or from an account: the order number plus the e-mail or mobile number that belongs to it
+        var order = await _db.Orders.AsNoTracking().Include(o => o.Items).Include(o => o.User)
+            .FirstOrDefaultAsync(o => o.OrderNumber == number);
         if (order == null) return generic;
 
         var given = contact.Trim();
         var matches = given.Contains('@')
             ? SameValue(ContactNormalizer.NormalizeEmail(given), ContactNormalizer.NormalizeEmail(order.GuestEmail))
-            : SameValue(ContactNormalizer.TryNormalizePhone(given), ContactNormalizer.TryNormalizePhone(order.GuestPhone));
+              || SameValue(ContactNormalizer.NormalizeEmail(given), ContactNormalizer.NormalizeEmail(order.User?.Email))
+            : SameValue(ContactNormalizer.TryNormalizePhone(given), ContactNormalizer.TryNormalizePhone(order.GuestPhone))
+              || SameValue(ContactNormalizer.TryNormalizePhone(given), ContactNormalizer.TryNormalizePhone(order.User?.Phone));
         if (!matches) return generic;
 
         var shipment = await _db.Shipments.AsNoTracking().Where(s => s.OrderId == order.Id && s.CreationState == ShipmentConstants.CreationStates.Created)
