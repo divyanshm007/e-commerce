@@ -1,3 +1,4 @@
+import { downloadPdf, istDateTime, inr, ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHOD } from '../shared/pdf-export';
 import { Component, OnInit, inject, signal, computed, ViewEncapsulation, ViewChild } from '@angular/core';
 import { NgIf, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -36,9 +37,9 @@ interface Payment {
       <h1 class="pay-page-title">Payments</h1>
       <p class="pay-page-sub">Payment transaction history</p>
     </div>
-    <button class="pay-refresh-btn" (click)="load()" title="Refresh">
+<div style="display:flex;gap:8px;align-items:center"><button class="pay-refresh-btn" (click)="exportPdf()" title="Download PDF"><i class="pi pi-file-pdf"></i></button><button class="pay-refresh-btn" (click)="load()" title="Refresh">
       <i class="pi pi-refresh"></i>
-    </button>
+    </button></div>
   </div>
 
   <!-- KPI Cards -->
@@ -390,6 +391,19 @@ export class AdminPaymentsComponent implements OnInit {
   private api = inject(ApiService);
 
   @ViewChild('dt') dt!: Table;
+
+  /** PDF of the payments as filtered on screen. */
+  exportPdf(): void {
+    const list = (this.dt?.filteredValue as Payment[] | null) ?? this.payments();
+    downloadPdf({
+      title: 'Payments report', filename: 'payments',
+      subtitle: [this.dt?.filteredValue ? 'Filtered list as shown on screen' : 'All payments loaded on screen'],
+      summary: [['Payments', String(list.length)], ['Paid total', inr(list.filter(p => p.status === 2).reduce((s, p) => s + (p.amount ?? 0), 0))]],
+      columns: ['Order', 'Customer', 'Amount', 'Method', 'Status', 'Razorpay payment id', 'Paid at (IST)', 'Created (IST)'],
+      rows: list.map(p => [p.orderNumber, p.customerName ?? '', inr(p.amount), PAYMENT_METHOD[p.method] ?? '', PAYMENT_STATUS[p.status] ?? '',
+        p.razorpayPaymentId ?? '', istDateTime(p.paidAt), istDateTime(p.createdAt)])
+    });
+  }
   searchValue = '';
 
   payments = signal<Payment[]>([]);

@@ -93,7 +93,7 @@ public class CouponService : ICouponService
 
         if (coupon.MinOrderAmount.HasValue && orderAmount < coupon.MinOrderAmount)
             return ApiResponse<CouponValidationDto>.Ok(new CouponValidationDto
-            { IsValid = false, Message = $"Minimum order amount of {coupon.MinOrderAmount:C} required." });
+            { IsValid = false, Message = $"Minimum order amount of ₹{coupon.MinOrderAmount:0.##} is required to use this coupon." });
 
         var discountAmount = coupon.DiscountType == DiscountType.Percentage
             ? Math.Min(orderAmount * coupon.DiscountValue / 100, coupon.MaxDiscountAmount ?? decimal.MaxValue)

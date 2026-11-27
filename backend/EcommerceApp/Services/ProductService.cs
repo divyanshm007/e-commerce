@@ -24,6 +24,7 @@ public class ProductService : IProductService
     private IQueryable<Product> BaseQuery() =>
         _db.Products
             .Include(p => p.Category)
+            .Include(p => p.ProductCategories).ThenInclude(pc => pc.Category)
             .Include(p => p.Images)
             .Include(p => p.Variants)
             .Include(p => p.Reviews.Where(r => r.Status != Domain.Enums.ReviewStatus.Rejected))
@@ -39,7 +40,7 @@ public class ProductService : IProductService
             query = query.Where(p => p.Name.Contains(filter.Search) ||
                                      (p.Description != null && p.Description.Contains(filter.Search)));
 
-        if (filter.CategoryId.HasValue) query = query.Where(p => p.CategoryId == filter.CategoryId);
+        if (filter.CategoryId.HasValue) query = query.Where(p => p.CategoryId == filter.CategoryId || p.ProductCategories.Any(pc => pc.CategoryId == filter.CategoryId));
         if (filter.MinPrice.HasValue) query = query.Where(p => p.Price >= filter.MinPrice);
         if (filter.MaxPrice.HasValue) query = query.Where(p => p.Price <= filter.MaxPrice);
         if (filter.IsFeatured.HasValue) query = query.Where(p => p.IsFeatured == filter.IsFeatured);
@@ -99,6 +100,7 @@ public class ProductService : IProductService
 
         var product = _mapper.Map<Product>(dto);
         product.Slug = productSlug;
+        ApplyCategories(product, dto);
 
         await _db.Products.AddAsync(product);
         await _db.SaveChangesAsync();
@@ -111,12 +113,14 @@ public class ProductService : IProductService
         var product = await _db.Products
             .Include(p => p.Images)
             .Include(p => p.Variants)
+            .Include(p => p.ProductCategories)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product == null) return ApiResponse<ProductDetailDto>.NotFound("Product not found.");
 
         var oldName = product.Name;
         _mapper.Map(dto, product);
+        ApplyCategories(product, dto);
 
         if (product.Name != oldName)
         {
@@ -135,6 +139,19 @@ public class ProductService : IProductService
 
         await _db.SaveChangesAsync();
         return await GetByIdAsync(id);
+    }
+
+    /// <summary>The first chosen category is the main one (Product.CategoryId); every chosen category gets a ProductCategories row.</summary>
+    private void ApplyCategories(Product product, CreateProductDto dto)
+    {
+        var chosen = ProductCategoryRules.Chosen(dto.CategoryId, dto.CategoryIds);
+        product.CategoryId = chosen.Count > 0 ? chosen[0] : null;
+        var keep = chosen.ToHashSet();
+        foreach (var gone in product.ProductCategories.Where(pc => !keep.Contains(pc.CategoryId)).ToList())
+            product.ProductCategories.Remove(gone);
+        var have = product.ProductCategories.Select(pc => pc.CategoryId).ToHashSet();
+        foreach (var id in chosen.Where(id => !have.Contains(id)))
+            product.ProductCategories.Add(new ProductCategory { ProductId = product.Id, CategoryId = id });
     }
 
     public async Task<ApiResponse<string>> DeleteAsync(Guid id)
@@ -203,7 +220,7 @@ public class ProductService : IProductService
         if (product == null) return ApiResponse<List<ProductListDto>>.Ok([]);
 
         var items = await BaseQuery()
-            .Where(p => p.CategoryId == product.CategoryId && p.Id != productId && p.IsActive)
+            .Where(p => (p.CategoryId == product.CategoryId || p.ProductCategories.Any(pc => _db.ProductCategories.Any(m => m.ProductId == productId && m.CategoryId == pc.CategoryId))) && p.Id != productId && p.IsActive)
             .OrderByDescending(p => p.SoldCount).Take(8).ToListAsync();
 
         return ApiResponse<List<ProductListDto>>.Ok(_mapper.Map<List<ProductListDto>>(items));

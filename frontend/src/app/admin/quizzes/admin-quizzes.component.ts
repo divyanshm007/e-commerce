@@ -272,10 +272,11 @@ import { QuizService } from '../../core/services/quiz.service';
     </div>
     <div class="qz-field">
       <label class="qz-label">Slug <span class="qz-req">*</span></label>
-      <div class="qz-input-wrap" [class.qz-input-err]="quizForm.get('slug')?.invalid && quizForm.get('slug')?.touched">
+      <div class="qz-input-wrap" [class.qz-input-err]="(quizForm.get('slug')?.invalid && quizForm.get('slug')?.touched) || slugTaken()">
         <span class="qz-slug-prefix">/quiz/</span>
         <input pInputText formControlName="slug" placeholder="dosha-quiz" class="qz-inp qz-inp-prefix" />
       </div>
+      <small *ngIf="slugTaken()" style="display:block;margin-top:4px;color:#dc2626;font-size:12px">Another quiz already uses this address. Change it, for example add a number.</small>
     </div>
     <div class="qz-field">
       <label class="qz-label">Description</label>
@@ -772,13 +773,31 @@ export class AdminQuizzesComponent implements OnInit {
   onQuizTitleChange() {
     if (!this.quizEditingId()) {
       const title = this.quizForm.get('title')?.value ?? '';
-      const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
-      this.quizForm.patchValue({ slug }, { emitEvent: false });
+      const base = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+      this.quizForm.patchValue({ slug: this.freeSlug(base) }, { emitEvent: false });
     }
+  }
+
+  /** The address of a quiz must be unique: "test" becomes "test-2" when another quiz already uses it. */
+  private freeSlug(base: string, ownId: string | null = null): string {
+    if (!base) return base;
+    const taken = new Set(this.quizzes().filter((q: any) => q.id !== ownId).map((q: any) => String(q.slug).toLowerCase()));
+    let slug = base, n = 2;
+    while (taken.has(slug)) slug = `${base}-${n++}`;
+    return slug;
+  }
+
+  slugTaken(): boolean {
+    const slug = String(this.quizForm.get('slug')?.value ?? '').trim().toLowerCase();
+    return !!slug && this.quizzes().some((q: any) => q.id !== this.quizEditingId() && String(q.slug).toLowerCase() === slug);
   }
 
   saveQuiz() {
     if (this.quizForm.invalid) { this.quizForm.markAllAsTouched(); return; }
+    if (this.slugTaken()) {
+      this.toast.add({ severity: 'warn', summary: 'Address already used', detail: 'Another quiz already uses this address (slug). Please change it.', life: 4000 });
+      return;
+    }
     this.saving.set(true);
     const payload = { ...this.quizForm.value, sortOrder: Number(this.quizForm.value.sortOrder ?? 0) };
     const req$ = this.quizEditingId()
@@ -792,7 +811,7 @@ export class AdminQuizzesComponent implements OnInit {
         this.loadList();
         if (this.view() === 'editor') this.reloadEditor();
       },
-      error: () => { this.saving.set(false); this.toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save quiz', life: 3000 }); }
+      error: (e) => { this.saving.set(false); this.toast.add({ severity: 'error', summary: 'Error', detail: e?.error?.message || 'Failed to save quiz', life: 4000 }); }
     });
   }
 

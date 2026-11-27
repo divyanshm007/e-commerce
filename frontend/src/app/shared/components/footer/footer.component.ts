@@ -16,10 +16,10 @@ import { ContentService } from '../../../core/services/content.service';
       <div class="container footer-grid">
         <!-- Brand -->
         <div class="footer-brand">
-          <div class="footer-logo">
+          <a class="footer-logo" routerLink="/" style="text-decoration:none;color:inherit;cursor:pointer" aria-label="Home">
             <img src="/assets/images/logo.png" alt="Sidham Pharmacy" class="footer-logo-img"/>
             <span class="footer-brand-name">Sidham Pharmacy</span>
-          </div>
+          </a>
           <p>Sidham Pharmacy is a modern, reliable e-commerce platform providing a wide range of authentic medicines and healthcare essentials with fast delivery and exceptional customer care.</p>
           <div class="social-links">
             <a href="https://facebook.com" class="social-btn facebook" aria-label="Follow us on Facebook" target="_blank" rel="noopener noreferrer">

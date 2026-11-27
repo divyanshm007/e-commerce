@@ -47,6 +47,9 @@ export interface ProductList {
 
 export interface ProductDetail extends ProductList {
   categoryId?: string;
+  /** Every category the product is in (the main one first). */
+  categoryIds?: string[];
+  categoryNames?: string[];
   manufacturer?: string;
   sku?: string;
   description?: string;

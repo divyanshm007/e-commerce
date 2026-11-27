@@ -1,3 +1,4 @@
+import { downloadPdf, istDateTime, inr, ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHOD } from '../shared/pdf-export';
 import { Component, OnInit, ViewChild, ViewEncapsulation, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIf, CurrencyPipe, DatePipe } from '@angular/common';
@@ -32,6 +33,7 @@ interface Tab { key: FulfilmentQueue; label: string; icon: string; color: string
       <span *ngIf="dash() as d" class="ap-mode" [class.ap-mode-live]="d.mode === 'live'" [class.ap-mode-bad]="d.mode === 'invalid'">
         Delhivery: {{ d.mode === 'invalid' ? 'INVALID MODE' : d.mode.toUpperCase() }}
       </span>
+      <button class="ol-refresh-btn" (click)="exportPdf()" title="Download PDF"><i class="pi pi-file-pdf"></i></button>
       <button class="ol-refresh-btn" (click)="reload()" title="Refresh"><i class="pi pi-refresh"></i></button>
     </div>
   </div>
@@ -231,6 +233,19 @@ export class AdminFulfilmentComponent implements OnInit {
   rejectReason = '';
 
   ngOnInit(): void { this.reload(); }
+
+  /** PDF of the list that is open (the selected card/tab). */
+  exportPdf(): void {
+    const list = this.rows();
+    downloadPdf({
+      title: 'Fulfilment report', filename: 'fulfilment',
+      subtitle: [`List: ${String(this.active()).replace(/-/g, ' ')}`],
+      summary: [['Orders', String(list.length)], ['Value', inr(list.reduce((s, r) => s + (r.totalAmount ?? 0), 0))]],
+      columns: ['Order', 'Date (IST)', 'Customer', 'Amount', 'Payment', 'Order status', 'Dispatch', 'AWB', 'Shipment', 'Note'],
+      rows: list.map(r => [r.orderNumber, istDateTime(r.orderDate), r.customerName, inr(r.totalAmount), `${r.paymentMethod} / ${r.paymentStatus}`,
+        r.orderStatus, r.fulfilmentState ?? 'Not approved', r.awb ?? '', r.shipmentStatus ?? '', r.attentionReason ?? r.lastError ?? (r.issues ?? []).join('; ')])
+    });
+  }
 
   reload(): void {
     this.svc.dashboard().subscribe({ next: r => this.dash.set(r.data ?? null), error: () => this.dash.set(null) });

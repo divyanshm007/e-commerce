@@ -332,10 +332,21 @@ export const DEFAULT_ABOUT: AboutPageData = {
                 </div>
                 <div class="ab-field"><label class="ab-label">Short Bio</label><textarea pTextarea [(ngModel)]="m.bio" [name]="'tm_b_'+m.id" rows="3" class="ab-textarea" placeholder="Brief description…"></textarea></div>
                 <div class="ab-field">
-                  <label class="ab-label">Photo URL</label>
-                  <div class="ab-img-row">
-                    <div class="ab-input-wrap ab-input-grow"><i class="pi pi-image ab-input-icon"></i><input pInputText [(ngModel)]="m.photo" [name]="'tm_p_'+m.id" class="ab-inp ab-inp-icon" placeholder="https://…"/></div>
-                    <div class="ab-img-thumb ab-img-sm" *ngIf="m.photo"><img [src]="m.photo" alt=""/></div>
+                  <label class="ab-label">Photo</label>
+                  <div class="ab-photo-row">
+                    <div class="ab-photo-box">
+                      <img *ngIf="m.photo" [src]="m.photo | mediaUrl" alt=""/>
+                      <i *ngIf="!m.photo" class="pi pi-user"></i>
+                    </div>
+                    <div class="ab-photo-actions">
+                      <input type="file" #pf accept="image/png,image/jpeg,image/webp" style="display:none" (change)="onPhotoSelected($event, m)"/>
+                      <button type="button" class="ab-add-btn" [disabled]="uploadingId === m.id" (click)="pf.click()">
+                        <i [class]="uploadingId === m.id ? 'pi pi-spin pi-spinner' : 'pi pi-upload'"></i>
+                        {{ uploadingId === m.id ? 'Uploading…' : (m.photo ? 'Change photo' : 'Upload photo') }}
+                      </button>
+                      <button type="button" class="ab-del-btn" *ngIf="m.photo" (click)="m.photo = ''" title="Remove photo"><i class="pi pi-trash"></i></button>
+                      <span class="ab-photo-hint">PNG, JPG or WebP, up to 5 MB. Click Save to publish.</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -592,6 +603,12 @@ export const DEFAULT_ABOUT: AboutPageData = {
 .ab-textarea:focus { border-color: #0F766E !important; box-shadow: 0 0 0 3px rgba(15,118,110,0.10) !important; }
 .ab-textarea::placeholder { color: #CBD5E1 !important; }
 
+/* Team photo */
+.ab-photo-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ab-photo-box { width: 72px; height: 72px; border-radius: 50%; overflow: hidden; border: 2px solid #E2E8F0; background: #F1F5F9; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #94A3B8; font-size: 26px; }
+.ab-photo-box img { width: 100%; height: 100%; object-fit: cover; }
+.ab-photo-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ab-photo-hint { font-size: 11px; color: #64748B; flex-basis: 100%; }
 /* Image row */
 .ab-img-row   { display: flex; align-items: flex-start; gap: 10px; }
 .ab-img-thumb { width: 68px; height: 68px; border-radius: 8px; border: 1px solid #E2E8F0; overflow: hidden; flex-shrink: 0; }
@@ -679,6 +696,34 @@ export class AdminAboutPageComponent implements OnInit {
   removeStat(i: number):  void { this.data.stats.items.splice(i, 1); }
   addMember():              void { this.data.team.members.push({ id: `t_${this.idCounter++}`, name: '', role: '', bio: '', photo: '' }); }
   removeMember(i: number):  void { this.data.team.members.splice(i, 1); }
+
+  uploadingId: string | null = null;
+
+  /** Photo chosen from the computer: uploaded to the server, then shown in the card (Save publishes it on /about). */
+  onPhotoSelected(event: Event, m: TeamMember): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
+      this.toast.add({ severity: 'warn', summary: 'Wrong file type', detail: 'Choose a PNG, JPG or WebP image.', life: 3500 });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.toast.add({ severity: 'warn', summary: 'Image too large', detail: 'The photo must be 5 MB or smaller.', life: 3500 });
+      return;
+    }
+    this.uploadingId = m.id;
+    this.contentService.uploadFile(file, 'team').subscribe({
+      next: (r: any) => {
+        this.uploadingId = null;
+        const url: string | undefined = r?.data?.url ?? r?.url;
+        if (url) { m.photo = url; this.toast.add({ severity: 'success', summary: 'Photo uploaded', detail: 'Click Save to publish it on the About page.', life: 3500 }); }
+        else this.toast.add({ severity: 'error', summary: 'Upload failed', detail: 'The server did not return the image address.', life: 4000 });
+      },
+      error: () => { this.uploadingId = null; this.toast.add({ severity: 'error', summary: 'Upload failed', detail: 'Could not upload the photo. Please try again.', life: 4000 }); }
+    });
+  }
   addValue():               void { this.data.values.items.push({ id: `v_${this.idCounter++}`, icon: 'pi-star', title: '', description: '' }); }
   removeValue(i: number):   void { this.data.values.items.splice(i, 1); }
   addService():              void { this.data.clinic.services.push(''); }

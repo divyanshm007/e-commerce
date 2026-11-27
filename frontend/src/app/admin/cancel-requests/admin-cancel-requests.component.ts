@@ -1,3 +1,4 @@
+import { downloadPdf, istDateTime, inr, ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHOD } from '../shared/pdf-export';
 import { Component, OnInit, ViewChild, ViewEncapsulation, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIf, DatePipe } from '@angular/common';
@@ -31,7 +32,7 @@ interface CancelRow {
       <h1 class="ol-page-title">Cancellation requests</h1>
       <p class="ol-page-sub">An order that is already dispatched is cancelled only after you approve</p>
     </div>
-    <button class="ol-refresh-btn" (click)="reload()" title="Refresh"><i class="pi pi-refresh"></i></button>
+<div style="display:flex;gap:8px;align-items:center"><button class="ol-refresh-btn" (click)="exportPdf()" title="Download PDF"><i class="pi pi-file-pdf"></i></button><button class="ol-refresh-btn" (click)="reload()" title="Refresh"><i class="pi pi-refresh"></i></button></div>
   </div>
 
   <!-- KPI cards = tabs -->
@@ -204,6 +205,18 @@ export class AdminCancelRequestsComponent implements OnInit {
   note = '';
 
   ngOnInit(): void { this.reload(); }
+
+  /** PDF of the list that is open (Pending, Approved or Rejected). */
+  exportPdf(): void {
+    const list = this.rows();
+    downloadPdf({
+      title: 'Cancel requests report', filename: 'cancel-requests',
+      subtitle: [`List: ${this.active()}`],
+      summary: [['Requests', String(list.length)]],
+      columns: ['Order', 'Requested (IST)', 'Customer', 'Email', 'Reason', 'Status', 'Order status', 'AWB', 'Team note'],
+      rows: list.map(r => [r.orderNumber, istDateTime(r.createdAt), r.customerName, r.customerEmail, r.reason, r.status, r.orderStatus, r.awb ?? '', r.adminNotes ?? ''])
+    });
+  }
 
   reload(): void { this.loadCounts(); this.loadRows(); }
 

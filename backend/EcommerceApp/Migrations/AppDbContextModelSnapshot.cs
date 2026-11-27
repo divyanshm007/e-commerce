@@ -1503,6 +1503,21 @@ namespace EcommerceApp.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("EcommerceApp.Domain.Entities.ProductCategory", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ProductId", "CategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("ProductCategories", (string)null);
+                });
+
             modelBuilder.Entity("EcommerceApp.Domain.Entities.ProductImage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2795,6 +2810,25 @@ namespace EcommerceApp.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("EcommerceApp.Domain.Entities.ProductCategory", b =>
+                {
+                    b.HasOne("EcommerceApp.Domain.Entities.Category", "Category")
+                        .WithMany("ProductCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EcommerceApp.Domain.Entities.Product", "Product")
+                        .WithMany("ProductCategories")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("EcommerceApp.Domain.Entities.ProductImage", b =>
                 {
                     b.HasOne("EcommerceApp.Domain.Entities.Product", "Product")
@@ -2984,6 +3018,8 @@ namespace EcommerceApp.Migrations
 
             modelBuilder.Entity("EcommerceApp.Domain.Entities.Category", b =>
                 {
+                    b.Navigation("ProductCategories");
+
                     b.Navigation("Products");
 
                     b.Navigation("SubCategories");
@@ -3008,6 +3044,8 @@ namespace EcommerceApp.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("OrderItems");
+
+                    b.Navigation("ProductCategories");
 
                     b.Navigation("ProductViews");
 

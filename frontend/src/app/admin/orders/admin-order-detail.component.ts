@@ -1,3 +1,4 @@
+import { printPackingSlip } from './order-print';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIf, DatePipe, CurrencyPipe } from '@angular/common';
@@ -48,7 +49,10 @@ import { OrderShipmentCardComponent } from './order-shipment-card.component';
       </div>
     </div>
     @if (order()) {
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
+        <button type="button" (click)="printSlip()" class="px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-800 text-sm font-semibold hover:bg-slate-50 flex items-center gap-2">
+          <i class="pi pi-print"></i> Print packing slip
+        </button>
         <p-tag [value]="'Order: ' + orderStatusLabel(order()!.status)" [severity]="orderStatusSeverity(order()!.status)" />
         <p-tag [value]="'Payment: ' + paymentStatusLabel(order()!.paymentStatus)" [severity]="paymentStatusSeverity(order()!.paymentStatus)" />
       </div>
@@ -310,6 +314,8 @@ export class AdminOrderDetailComponent implements OnInit {
       }
     });
   }
+
+  printSlip(): void { const o = this.order(); if (o) printPackingSlip(o); }
 
   ngOnInit(): void {
     this.orderSvc.getById(this.orderId).subscribe({

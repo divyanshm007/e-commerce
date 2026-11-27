@@ -84,7 +84,7 @@ public class CategoryService : ICategoryService
         var cat = await _db.Categories.FindAsync(id);
         if (cat == null) return ApiResponse<string>.NotFound("Category not found.");
 
-        var productCount = await _db.Products.CountAsync(p => p.CategoryId == id);
+        var productCount = await _db.Products.CountAsync(p => p.CategoryId == id || p.ProductCategories.Any(pc => pc.CategoryId == id));
         _db.Categories.Remove(cat);
         await _db.SaveChangesAsync();
         return ApiResponse<string>.Ok($"Category deleted. {productCount} product(s) moved to uncategorized.");
@@ -129,7 +129,7 @@ public class CategoryService : ICategoryService
         var query = _db.Products
             .Include(p => p.Category)
             .Include(p => p.Images)
-            .Where(p => p.CategoryId.HasValue && categoryIds.Contains(p.CategoryId.Value))
+            .Where(p => (p.CategoryId.HasValue && categoryIds.Contains(p.CategoryId.Value)) || p.ProductCategories.Any(pc => categoryIds.Contains(pc.CategoryId)))
             .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))

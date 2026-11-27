@@ -3,6 +3,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgFor, NgIf, NgClass, DatePipe, CurrencyPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { ReturnContactDialogComponent } from './return-contact-dialog.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { OrderService } from '../../../core/services/order.service';
@@ -77,6 +80,12 @@ import { ShipmentTimelineComponent } from './shipment-timeline.component';
                 <strong>Cancellation request: {{ cancelRequest.status === 'Pending' ? 'waiting for approval' : cancelRequest.status.toLowerCase() }}</strong>
                 <div *ngIf="cancelRequest.adminNotes" style="margin-top:4px">Note from our team: {{ cancelRequest.adminNotes }}</div>
               </div>
+              <button mat-flat-button color="primary" style="margin-top:16px;width:100%" *ngIf="order!.status === 4" (click)="returnOrder()">
+                <mat-icon>assignment_return</mat-icon> Return this order
+              </button>
+              <p style="margin:12px 0 0;font-size:13px;color:#64748b" *ngIf="order!.status === 4">
+                Delivered. To return it, contact us by phone or e-mail.
+              </p>
               <p style="margin:12px 0 0;font-size:13px;color:#047857" *ngIf="cancelInfo">{{ cancelInfo }}</p>
               <p style="margin:12px 0 0;font-size:13px;color:#64748b"
                 *ngIf="(order!.status === 1 || order!.status === 2) && order!.paymentStatus === 2">
@@ -85,7 +94,7 @@ import { ShipmentTimelineComponent } from './shipment-timeline.component';
               <p style="margin:12px 0 0;font-size:13px;color:#b91c1c" *ngIf="cancelError">{{ cancelError }}</p>
             </div>
 
-            <app-shipment-timeline [orderId]="order!.id" />
+            <app-shipment-timeline [orderId]="order!.id" [status]="order!.status" [placedAt]="order!.createdAt" [shippedAt]="order!.shippedAt" [deliveredAt]="order!.deliveredAt" />
 
             <div class="detail-card card">
               <h3>Shipping Address</h3>
@@ -145,6 +154,7 @@ export class OrderDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private orderService = inject(OrderService);
   private api = inject(ApiService);
+  private dialog = inject(MatDialog);
   readonly orderItemHasOffer = orderItemHasOffer;
   readonly orderItemSellingUnit = orderItemSellingUnit;
 
@@ -178,7 +188,31 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
+  /** A delivered order is returned by contacting the store: the popup shows the phone number and e-mail. */
+  returnOrder(): void {
+    if (!this.order) return;
+    this.dialog.open(ReturnContactDialogComponent, { data: { orderNumber: this.order.orderNumber }, autoFocus: false });
+  }
+
+  /** Nothing is cancelled until the customer confirms in a popup. */
   cancelOrder(): void {
+    if (!this.order) return;
+    const shipped = this.order.status === 3;
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: shipped ? 'Request cancellation' : 'Cancel order',
+        message: shipped
+          ? `Order ${this.order.orderNumber} is already shipped. Do you want to send a cancellation request to our team?`
+          : `Do you want to cancel order ${this.order.orderNumber}? This cannot be undone.`,
+        confirmLabel: shipped ? 'Yes, send request' : 'Yes, cancel order',
+        cancelLabel: 'No, keep my order',
+        confirmColor: 'warn',
+        icon: 'cancel'
+      }
+    }).afterClosed().subscribe(ok => { if (ok) this.doCancel(); });
+  }
+
+  private doCancel(): void {
     if (!this.order) return;
     this.cancelError = ''; this.cancelInfo = '';
     let reason: string | undefined;

@@ -352,7 +352,8 @@ import { mediaUrl } from '../../../core/utils/media';
     }
 
     /* Mega Menu */
-    .mega-menu-wrapper { position: relative; }
+    /* static: the menu is placed against the whole header, so it opens in the middle of the page */
+    .mega-menu-wrapper { position: static; }
 
     .mega-menu {
       position: absolute; top: 100%; left: 50%; transform: translateX(-50%);

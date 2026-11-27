@@ -206,7 +206,7 @@ function sixDigitPin(c: AbstractControl): ValidationErrors | null {
             {{ applyingCoupon ? '…' : 'Apply' }}
           </button>
         </div>
-        <p class="coupon-msg success" *ngIf="couponMsg">{{ couponMsg }}</p>
+        <p class="coupon-msg" [class.success]="!couponErr" [class.err]="couponErr" *ngIf="couponMsg">{{ couponMsg }}</p>
         <div class="summary-row discount" *ngIf="cart && cart.discountAmount > 0">
           <span>Coupon Discount</span>
           <span>-{{ cart.discountAmount | currency:'INR':'symbol':'1.0-0' }}</span>
@@ -327,6 +327,7 @@ function sixDigitPin(c: AbstractControl): ValidationErrors | null {
       button { height: 56px; min-width: 76px; flex-shrink: 0; }
     }
     .coupon-msg { font-size: 12px; color: #16a34a; margin: 0 0 4px; }
+    .coupon-msg.err { color: #b91c1c; }
 
     .place-btn {
       width: 100%; height: 52px; font-size: 16px; font-weight: 700;
@@ -382,6 +383,7 @@ export class CheckoutComponent implements OnInit {
   placingOrder = false;
   couponCode = '';
   couponMsg = '';
+  couponErr = false;
   applyingCoupon = false;
 
   ngOnInit(): void {
@@ -440,11 +442,11 @@ export class CheckoutComponent implements OnInit {
     this.cartService.applyCoupon(this.couponCode).subscribe({
       next: (res) => {
         this.cart = res.data ?? this.cart;
-        this.couponMsg = 'Coupon applied!';
+        this.couponMsg = 'Coupon applied!'; this.couponErr = false;
         this.applyingCoupon = false;
       },
-      error: () => {
-        this.couponMsg = 'Invalid coupon code';
+      error: (e) => {
+        this.couponMsg = e?.error?.message || 'Invalid coupon code'; this.couponErr = true;
         this.applyingCoupon = false;
       }
     });

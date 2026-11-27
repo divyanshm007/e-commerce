@@ -14,13 +14,13 @@ import { AuthService } from '../../core/services/auth.service';
   <!-- Left decorative panel -->
   <div class="al-brand">
     <div class="al-brand-inner">
-      <div class="al-logo">
+      <a class="al-logo" routerLink="/" style="text-decoration:none;color:inherit;cursor:pointer" aria-label="Home">
         <img src="assets/images/logo.png" alt="Sidham" class="al-logo-img" />
         <div class="al-logo-text">
           <span class="al-logo-name">Sidham</span>
           <span class="al-logo-sub">Admin Panel</span>
         </div>
-      </div>
+      </a>
       <div class="al-brand-copy">
         <h2 class="al-brand-h">Manage your<br /><span class="al-brand-accent">store</span> from here.</h2>
         <p class="al-brand-p">Products, orders, customers, content — everything in one place.</p>

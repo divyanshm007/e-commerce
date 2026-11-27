@@ -120,7 +120,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
       <div class="team-grid">
         <div class="team-card" *ngFor="let m of d.team.members">
           <div class="team-photo" *ngIf="m.photo">
-            <img [src]="m.photo" [alt]="m.name + ' – team member'" loading="lazy" width="200" height="200"/>
+            <img [src]="m.photo | mediaUrl" [alt]="m.name + ' – team member'" loading="lazy" width="200" height="200"/>
           </div>
           <div class="team-avatar" *ngIf="!m.photo">
             <span>{{ initials(m.name) }}</span>

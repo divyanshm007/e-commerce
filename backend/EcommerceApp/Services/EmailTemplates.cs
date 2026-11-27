@@ -13,6 +13,14 @@ public static class EmailTemplates
     private const string TextMuted = "#64748b";
     private const string Border = "#e2e8f0";
 
+    /// <summary>A stored UTC time shown in Indian Standard Time (fixed +05:30: India has no daylight saving, and this needs no tz database in the container).</summary>
+    public static string Ist(DateTime utc, bool withTime = true)
+    {
+        var u = utc.Kind == DateTimeKind.Local ? utc.ToUniversalTime() : DateTime.SpecifyKind(utc, DateTimeKind.Utc);
+        var ist = u.AddHours(5).AddMinutes(30);
+        return withTime ? $"{ist:dd MMM yyyy, hh:mm tt} IST" : ist.ToString("dd MMM yyyy");
+    }
+
     // ── Master layout ──────────────────────────────────────────────
     private static string Wrap(string title, string body) => $"""
         <!DOCTYPE html>
@@ -186,7 +194,7 @@ public static class EmailTemplates
     // ════════════════════════════════════════════════════════════════
 
     public static string ContactFormAdmin(string name, string email, string phone, string message) => Wrap("New Contact Form Submission", $"""
-        {Alert("📬", $"A new contact form has been submitted on <strong>{DateTime.Now:dd MMM yyyy, hh:mm tt}</strong>.")}
+        {Alert("📬", $"A new contact form has been submitted on <strong>{Ist(DateTime.UtcNow)}</strong>.")}
         <table width="100%" cellpadding="0" cellspacing="0">
           {InfoRow("Name", name)}
           {InfoRow("Email", $"<a href='mailto:{email}' style='color:{Green};'>{email}</a>")}
@@ -225,7 +233,7 @@ public static class EmailTemplates
         """);
 
     public static string ConsultationAdmin(string name, string email, string phone, string concern, string? preferredDate, string? preferredTime, string? doshaType) => Wrap("New Consultation Request 🏥", $"""
-        {Alert("🏥", $"New consultation request received on <strong>{DateTime.Now:dd MMM yyyy, hh:mm tt}</strong>.")}
+        {Alert("🏥", $"New consultation request received on <strong>{Ist(DateTime.UtcNow)}</strong>.")}
         <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
           {InfoRow("Patient Name", name)}
           {InfoRow("Email", $"<a href='mailto:{email}' style='color:{Green};'>{email}</a>")}
@@ -263,7 +271,7 @@ public static class EmailTemplates
         <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
           {InfoRow("Order Number", $"#{order.OrderNumber}")}
           {InfoRow("Payment Method", order.PaymentMethod.ToString())}
-          {InfoRow("Order Date", order.CreatedAt.ToString("dd MMM yyyy, hh:mm tt"))}
+          {InfoRow("Order Date", Ist(order.CreatedAt))}
         </table>
         {Alert("📦", "We'll send you a shipping confirmation with tracking details once your order is dispatched. Estimated delivery: 3–7 business days.")}
         <div style="text-align:center;">{Btn(TrackUrl(order), "Track My Order")}</div>
@@ -283,7 +291,7 @@ public static class EmailTemplates
         {Badge("🚚 Shipped", "#dbeafe", "#1d4ed8")}
         <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
           {InfoRow("Order Number", $"#{order.OrderNumber}")}
-          {InfoRow("Shipped On", order.ShippedAt?.ToString("dd MMM yyyy") ?? DateTime.Now.ToString("dd MMM yyyy"))}
+          {InfoRow("Shipped On", Ist(order.ShippedAt ?? DateTime.UtcNow, false))}
           {(order.TrackingNumber != null ? InfoRow("Tracking Number", $"<strong>{order.TrackingNumber}</strong>") : "")}
         </table>
         {ShippingAddressBlock(order)}
@@ -352,7 +360,7 @@ public static class EmailTemplates
     // ════════════════════════════════════════════════════════════════
 
     public static string ReviewPendingAdmin(string customerName, string customerEmail, string productName, string comment) => Wrap("New Review Pending Approval 🌟", $"""
-        {Alert("⭐", $"A new review has been submitted on <strong>{DateTime.Now:dd MMM yyyy, hh:mm tt}</strong> and is awaiting approval.")}
+        {Alert("⭐", $"A new review has been submitted on <strong>{Ist(DateTime.UtcNow)}</strong> and is awaiting approval.")}
         <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
           {InfoRow("Customer", customerName)}
           {InfoRow("Email", $"<a href='mailto:{customerEmail}' style='color:{Green};'>{customerEmail}</a>")}

@@ -137,6 +137,14 @@ public class CartService : ICartService
 
         if (coupon == null) return ApiResponse<CartDto>.Fail("Invalid or expired coupon code.");
 
+        // below the coupon's minimum: tell the customer instead of "applying" a coupon that gives nothing
+        if (coupon.MinOrderAmount.HasValue)
+        {
+            var current = await BuildCartDtoAsync(cart);
+            if (current.SubTotal < coupon.MinOrderAmount.Value)
+                return ApiResponse<CartDto>.Fail($"Minimum order amount of ₹{coupon.MinOrderAmount.Value:0.##} is required to use this coupon.");
+        }
+
         cart.AppliedCouponCode = couponCode.ToUpper();
         await _db.SaveChangesAsync();
         return ApiResponse<CartDto>.Ok(await BuildCartDtoAsync(cart));

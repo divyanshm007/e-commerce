@@ -22,16 +22,16 @@ interface NavGroup { title: string; items: NavItem[]; }
 
         <!-- Logo -->
         <div class="adm-logo">
-          <div class="logo-mark" *ngIf="!collapsed">
+          <a class="logo-mark" routerLink="/admin/dashboard" style="text-decoration:none;color:inherit;cursor:pointer" *ngIf="!collapsed" aria-label="Dashboard">
             <img src="assets/images/logo.png" alt="Logo" class="logo-img" />
             <div class="logo-text">
               <span class="logo-name">Sidham</span>
               <span class="logo-sub">Admin Panel</span>
             </div>
-          </div>
-          <div class="logo-icon-only" *ngIf="collapsed">
+          </a>
+          <a class="logo-icon-only" routerLink="/admin/dashboard" style="text-decoration:none;color:inherit;cursor:pointer" *ngIf="collapsed" aria-label="Dashboard">
             <img src="assets/images/logo.png" alt="Logo" class="logo-img-sm" />
-          </div>
+          </a>
           <button class="collapse-btn" (click)="toggleMenu()"
             [pTooltip]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
             tooltipPosition="right">

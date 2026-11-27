@@ -26,6 +26,9 @@ public class ProductListDto
 public class ProductDetailDto : ProductListDto
 {
     public Guid? CategoryId { get; set; }
+    /// <summary>Every category the product is in (the main one first).</summary>
+    public List<Guid> CategoryIds { get; set; } = [];
+    public List<string> CategoryNames { get; set; } = [];
     public string? Manufacturer { get; set; }
     public string? Sku { get; set; }
     public string? Description { get; set; }
@@ -79,6 +82,8 @@ public class CreateProductDto
 {
     public string Name { get; set; } = string.Empty;
     public Guid? CategoryId { get; set; }
+    /// <summary>All categories for the product. The first one becomes the main category; when omitted, CategoryId alone is used.</summary>
+    public List<Guid>? CategoryIds { get; set; }
     public string? Manufacturer { get; set; }
     public string? Sku { get; set; }
     public decimal Price { get; set; }

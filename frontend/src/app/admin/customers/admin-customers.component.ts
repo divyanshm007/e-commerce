@@ -1,3 +1,4 @@
+import { downloadPdf, istDateTime, inr, ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHOD } from '../shared/pdf-export';
 import { Component, OnInit, inject, signal, computed, ViewEncapsulation, ViewChild } from '@angular/core';
 import { NgIf, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -41,9 +42,9 @@ interface Customer {
       <h1 class="cu-page-title">Customers</h1>
       <p class="cu-page-sub">{{ totalCount() }} registered customers</p>
     </div>
-    <button class="cu-refresh-btn" (click)="load()" title="Refresh">
+<div style="display:flex;gap:8px;align-items:center"><button class="cu-refresh-btn" (click)="exportPdf()" title="Download PDF"><i class="pi pi-file-pdf"></i></button><button class="cu-refresh-btn" (click)="load()" title="Refresh">
       <i class="pi pi-refresh"></i>
-    </button>
+    </button></div>
   </div>
 
   <!-- KPI Cards -->
@@ -489,6 +490,19 @@ export class AdminCustomersComponent implements OnInit {
   private api = inject(ApiService);
 
   @ViewChild('dt') dt!: Table;
+
+  /** PDF of the customers as filtered on screen. */
+  exportPdf(): void {
+    const list = (this.dt?.filteredValue as Customer[] | null) ?? this.customers();
+    downloadPdf({
+      title: 'Customers report', filename: 'customers',
+      subtitle: [this.dt?.filteredValue ? 'Filtered list as shown on screen' : 'All customers loaded on screen'],
+      summary: [['Customers', String(list.length)], ['Total spent', inr(list.reduce((s, c) => s + (c.totalSpent ?? 0), 0))]],
+      columns: ['Name', 'Email', 'Phone', 'Orders', 'Spent', 'Status', 'Joined (IST)'],
+      rows: list.map(c => [c.fullName || `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim(), c.email, c.phone ?? '', c.ordersCount ?? 0,
+        inr(c.totalSpent), c.isActive === false ? 'Inactive' : 'Active', istDateTime(c.createdAt)])
+    });
+  }
 
   searchValue = '';
   customers  = signal<Customer[]>([]);

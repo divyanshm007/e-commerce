@@ -24,9 +24,9 @@ function passwordMatch(control: AbstractControl) {
           <img src="assets/images/about-hero.jpg" class="deco deco-top" alt="" aria-hidden="true" loading="lazy" />
 
           <div class="brand-logo">
-            <div class="logo-wrap">
+            <a class="logo-wrap" routerLink="/" style="text-decoration:none;color:inherit;cursor:pointer" aria-label="Home">
               <img src="assets/images/logo.png" alt="Sidham Pharmacy logo" />
-            </div>
+            </a>
           </div>
 
           <div class="brand-hero">

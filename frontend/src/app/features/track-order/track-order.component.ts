@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
+import { OrderProgressComponent } from '../../shared/components/order-progress/order-progress.component';
 
 interface TrackResult {
   orderNumber: string;
@@ -22,7 +23,7 @@ interface TrackResult {
 @Component({
   selector: 'app-track-order',
   standalone: true,
-  imports: [NgIf, NgFor, DatePipe, FormsModule, RouterLink],
+  imports: [NgIf, NgFor, DatePipe, FormsModule, RouterLink, OrderProgressComponent],
   template: `
 <div class="page-content" style="max-width:640px;margin:32px auto;padding:0 16px">
   <h1 style="margin:0 0 6px">Track your order</h1>
@@ -47,11 +48,14 @@ interface TrackResult {
 
   <div *ngIf="result() as r" class="card" style="padding:20px;margin-top:16px">
     <h3 style="margin:0 0 4px">Order #{{ r.orderNumber }}</h3>
-    <p style="margin:0 0 12px;color:#64748b;font-size:13px">Placed {{ r.placedAt | date:'mediumDate' }}</p>
-    <p style="margin:0 0 12px"><strong>Status:</strong> {{ statusLabel(r.status) }}</p>
-    <ul style="margin:0 0 12px;padding-left:18px">
+    <p style="margin:0 0 12px;color:#64748b;font-size:13px">Placed {{ r.placedAt | date:'mediumDate':'+0530' }}</p>
+    <ul style="margin:0 0 18px;padding-left:18px">
       <li *ngFor="let i of r.items">{{ i.productName }} × {{ i.quantity }}</li>
     </ul>
+    <app-order-progress [status]="r.status" [placedAt]="r.placedAt" [shippedAt]="r.shippedAt" [deliveredAt]="r.deliveredAt"
+      [shipmentStatus]="r.shipment?.status" [courier]="r.shipment?.courier" [awb]="r.shipment?.awb"
+      [expected]="r.shipment?.expectedDeliveryDate" [timeline]="r.shipment?.timeline" />
+    <h4 style="margin:20px 0 8px">Delivery details</h4>
 
     <ng-container *ngIf="r.shipment as s; else notShipped">
       <p style="margin:0"><strong>Courier:</strong> {{ s.courier }}</p>
@@ -61,7 +65,7 @@ interface TrackResult {
       <ol *ngIf="s.timeline.length" style="list-style:none;margin:14px 0 0;padding:0;border-left:2px solid #d1fae5">
         <li *ngFor="let e of s.timeline" style="padding:0 0 12px 14px;font-size:13px">
           <strong>{{ e.status }}</strong><span *ngIf="e.location" style="color:#64748b"> · {{ e.location }}</span>
-          <div style="color:#94a3b8;font-size:12px">{{ e.time | date:'dd MMM yyyy, h:mm a' }}</div>
+          <div style="color:#64748b;font-size:12px">{{ e.time | date:'dd MMM yyyy, h:mm a':'+0530' }} IST</div>
         </li>
       </ol>
     </ng-container>

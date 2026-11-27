@@ -42,6 +42,7 @@ public class Product : BaseEntity
     public string? MetaDescription { get; set; }
 
     public Category Category { get; set; } = null!;
+    public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
     public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
     public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

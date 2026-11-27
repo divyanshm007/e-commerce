@@ -1,3 +1,4 @@
+import { downloadPdf, istDateTime, inr, ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHOD } from '../shared/pdf-export';
 import { Component, OnInit, inject, signal, computed, ViewEncapsulation, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIf, CurrencyPipe, DatePipe } from '@angular/common';
@@ -29,9 +30,9 @@ import { OrderList, OrderStatus, PaymentStatus, PaymentMethod } from '../../core
       <h1 class="ol-page-title">Orders</h1>
       <p class="ol-page-sub">{{ totalCount() }} total orders</p>
     </div>
-    <button class="ol-refresh-btn" (click)="loadOrders()" title="Refresh">
+<div style="display:flex;gap:8px;align-items:center"><button class="ol-refresh-btn" (click)="exportPdf()" title="Download PDF"><i class="pi pi-file-pdf"></i></button><button class="ol-refresh-btn" (click)="loadOrders()" title="Refresh">
       <i class="pi pi-refresh"></i>
-    </button>
+    </button></div>
   </div>
 
   <!-- KPI Cards -->
@@ -589,6 +590,19 @@ export class AdminOrderListComponent implements OnInit {
   private orderService = inject(OrderService);
 
   @ViewChild('dt') dt!: Table;
+
+  /** PDF of the orders as filtered on screen. */
+  exportPdf(): void {
+    const list = (this.dt?.filteredValue as OrderList[] | null) ?? this.orders();
+    downloadPdf({
+      title: 'Orders report', filename: 'orders',
+      subtitle: [this.dt?.filteredValue ? 'Filtered list as shown on screen' : 'All orders loaded on screen'],
+      summary: [['Orders', String(list.length)], ['Value', inr(list.reduce((s, o) => s + (o.totalAmount ?? 0), 0))]],
+      columns: ['Order', 'Date (IST)', 'Customer', 'Email', 'Items', 'Amount', 'Payment', 'Pay status', 'Order status'],
+      rows: list.map(o => [o.orderNumber, istDateTime(o.createdAt), o.customerName ?? '', o.customerEmail ?? '', o.itemCount, inr(o.totalAmount),
+        PAYMENT_METHOD[o.paymentMethod] ?? '', PAYMENT_STATUS[o.paymentStatus] ?? '', ORDER_STATUS[o.status] ?? ''])
+    });
+  }
 
   searchValue = '';
   loading    = signal(true);

@@ -875,7 +875,7 @@ export class AdminCategoriesComponent implements OnInit {
     this.dialogVisible = true;
   }
 
-  closeDialog() { this.dialogVisible = false; this.form.reset(); this.imagePreview.set(null); }
+  closeDialog() { this.saving.set(false); this.dialogVisible = false; this.form.reset(); this.imagePreview.set(null); }
 
   onImgFile(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -926,6 +926,7 @@ export class AdminCategoriesComponent implements OnInit {
     req$.subscribe({
       next: () => {
         this.toast.add({ severity: 'success', summary: 'Success', detail: `Category ${this.isEdit ? 'updated' : 'created'} successfully`, life: 3000 });
+        this.saving.set(false);                    // without this the next "Add Category" opened with a disabled Save button
         this.closeDialog(); this.load();
       },
       error: () => { this.saving.set(false); this.toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save category', life: 3000 }); }

@@ -1,3 +1,4 @@
+import { downloadPdf, istDateTime, inr, ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHOD } from '../shared/pdf-export';
 import { Component, OnInit, inject, signal, ViewEncapsulation } from '@angular/core';
 import { NgIf, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -20,6 +21,7 @@ import { OrderList, OrderStatus } from '../../core/models/order.models';
       <h1 class="rp-page-title">Reports</h1>
       <p class="rp-page-sub">Sales analytics and insights</p>
     </div>
+    <button class="rp-apply-btn" (click)="exportPdf()" [disabled]="loading()" title="Download PDF"><i class="pi pi-file-pdf"></i> Download PDF</button>
   </div>
 
   <!-- Date Range Filter -->
@@ -282,6 +284,19 @@ export class AdminReportsComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
+    });
+  }
+
+  /** PDF of the report for the chosen date range: the totals, then the highest-value orders. */
+  exportPdf(): void {
+    downloadPdf({
+      title: 'Sales report', filename: 'sales-report',
+      subtitle: [`Period: ${this.rangeNote()}`],
+      summary: [['Revenue', inr(this.totalRevenue())], ['Orders', String(this.ordersCount())], ['Average order', inr(this.avgOrderValue())],
+        ['Delivered', String(this.deliveredCount())], ['Cancelled', String(this.cancelledCount())]],
+      columns: ['Order', 'Date (IST)', 'Customer', 'Amount', 'Payment', 'Pay status', 'Order status'],
+      rows: this.topOrders().map(o => [o.orderNumber, istDateTime(o.createdAt), o.customerName ?? '', inr(o.totalAmount),
+        PAYMENT_METHOD[o.paymentMethod] ?? '', PAYMENT_STATUS[o.paymentStatus] ?? '', ORDER_STATUS[o.status] ?? ''])
     });
   }
 

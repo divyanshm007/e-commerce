@@ -6,6 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
@@ -20,7 +21,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
   providers: [MessageService],
   imports: [
     RouterLink, NgFor, NgIf, DecimalPipe, ReactiveFormsModule,
-    InputTextModule, TextareaModule, ButtonModule, SelectModule,
+    InputTextModule, TextareaModule, ButtonModule, SelectModule, MultiSelectModule,
     ToggleSwitchModule, ToastModule, TooltipModule, MediaUrlPipe
   ],
   template: `
@@ -79,10 +80,17 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
 
             <div class="row-2">
               <div class="fg">
-                <label class="fg-label">Category <span class="req">*</span></label>
-                <p-select formControlName="categoryId" [options]="categories()" optionLabel="name" optionValue="id"
-                  placeholder="Select category" class="ff" styleClass="w-full" />
-                <small class="fg-err" *ngIf="false">Category is required</small>
+                <label class="fg-label">Categories</label>
+                <p-multiselect formControlName="categoryIds" [options]="categories()" optionLabel="name" optionValue="id"
+                  placeholder="Select one or more categories" [maxSelectedLabels]="0" selectedItemsLabel="{0} selected" [filter]="true"
+                  filterPlaceholder="Search categories" class="ff" styleClass="w-full" appendTo="body" />
+                <div class="cat-badges" *ngIf="selectedCats().length">
+                  <span class="cat-badge" *ngFor="let c of selectedCats(); let i = index" [style.background]="palette[i % palette.length].bg" [style.color]="palette[i % palette.length].fg" [style.borderColor]="palette[i % palette.length].fg + '33'">
+                    {{ c.name }}<em *ngIf="i === 0" class="cat-main">Main</em>
+                    <button type="button" class="cat-x" [style.color]="palette[i % palette.length].fg" (click)="removeCategory(c.id)" [attr.aria-label]="'Remove ' + c.name">&times;</button>
+                  </span>
+                </div>
+                <small class="fg-hint">The first one you pick is the main category. The product shows under every category you choose.</small>
               </div>
               <div class="fg">
                 <label class="fg-label">SKU</label>
@@ -326,7 +334,7 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
               <input type="file" #fileInput multiple accept="image/*" (change)="onFilesSelected($event)" style="display:none">
               <ng-container *ngIf="!selectedFiles.length">
                 <i class="pi pi-cloud-upload uz-ic"></i>
-                <p class="uz-txt">Drag & drop or <button type="button" class="uz-link" (click)="fileInput.click()">browse files</button></p>
+                <p class="uz-txt"><button type="button" class="uz-link" (click)="fileInput.click()">Select images from folder</button></p>
                 <p class="uz-hint">PNG, JPG, WebP — max 5MB each</p>
               </ng-container>
               <ng-container *ngIf="selectedFiles.length">
@@ -550,6 +558,11 @@ import { MediaUrlPipe } from '../../../shared/pipes/media-url.pipe';
       color: #16a34a; font-weight: 700; background: none;
       border: none; cursor: pointer; padding: 0; font-size: 14px;
     }
+    .cat-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .cat-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 6px 5px 12px; border: 1px solid; border-radius: 999px; font-size: 13px; font-weight: 600; }
+    .cat-main { font-style: normal; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; padding: 1px 6px; border-radius: 999px; background: rgba(255,255,255,.7); }
+    .cat-x { width: 20px; height: 20px; border: 0; border-radius: 50%; background: rgba(255,255,255,.75); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+    .cat-x:hover { background: #fff; }
     .uz-hint { font-size: 12px; color: #94a3b8; margin: 0; }
     .uz-actions { display: flex; gap: 10px; align-items: center; margin-top: 14px; }
     .uz-change {
@@ -614,6 +627,24 @@ export class AdminProductFormComponent implements OnInit {
   imagePreviewUrls: string[] = [];
   private productId: string | null = null;
 
+  /** Badge colours for the chosen categories (background, text). */
+  readonly palette = [
+    { bg: '#dcfce7', fg: '#166534' }, { bg: '#dbeafe', fg: '#1d4ed8' }, { bg: '#fef3c7', fg: '#92400e' },
+    { bg: '#fce7f3', fg: '#9d174d' }, { bg: '#ede9fe', fg: '#5b21b6' }, { bg: '#ccfbf1', fg: '#115e59' }
+  ];
+
+  selectedCats(): Category[] {
+    const ids = (this.form.get('categoryIds')?.value ?? []) as string[];
+    const all = this.categories();
+    return ids.map(id => all.find(c => c.id === id)).filter((c): c is Category => !!c);
+  }
+
+  removeCategory(id: string): void {
+    const ctrl = this.form.get('categoryIds')!;
+    ctrl.setValue(((ctrl.value ?? []) as string[]).filter(x => x !== id));
+    ctrl.markAsDirty();
+  }
+
   flagDefs = [
     { ctrl: 'isFeatured',          label: 'Featured',               desc: 'Show in featured sections',           icon: 'pi-star',         color: '#ca8a04', bg: '#fefce8' },
     { ctrl: 'isNewArrival',        label: 'New Arrival',            desc: 'Mark as newly added',                 icon: 'pi-sparkles',     color: '#059669', bg: '#ecfdf5' },
@@ -645,7 +676,7 @@ export class AdminProductFormComponent implements OnInit {
 
   form = this.fb.group({
     name:                ['', Validators.required],
-    categoryId:          [''],
+    categoryIds:         [[] as string[]],
     sku:                 [''],
     price:               [0, [Validators.required, Validators.min(0)]],
     discountPrice:       [null as number | null],
@@ -673,6 +704,9 @@ export class AdminProductFormComponent implements OnInit {
     metaDescription:     ['']
   });
 
+  /** A blank product, used when the same page instance is asked for "new" again. */
+  private readonly blank = this.form.getRawValue();
+
   ngOnInit(): void {
     this.productService.getCategories().subscribe(r => { if (r.data) this.categories.set(r.data); });
 
@@ -682,6 +716,14 @@ export class AdminProductFormComponent implements OnInit {
         this.productId = id;
         this.isEdit.set(true);
         this.loadProduct(id);
+      } else {
+        // "Add Product" opened while this page was still showing the product that was just saved: start clean
+        this.productId = null;
+        this.isEdit.set(false);
+        this.saving.set(false);
+        this.form.reset(this.blank);
+        this.selectedFiles = [];
+        this.imagePreviewUrls = [];
       }
     });
   }
@@ -694,7 +736,7 @@ export class AdminProductFormComponent implements OnInit {
           const p = res.data;
           this.form.patchValue({
             name: p.name,
-            categoryId: p.categoryId ?? '',
+            categoryIds: (p as any).categoryIds?.length ? (p as any).categoryIds : (p.categoryId ? [p.categoryId] : []),
             sku: p.sku ?? '',
             price: p.price,
             discountPrice: p.discountPrice ?? null,
@@ -758,7 +800,8 @@ export class AdminProductFormComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
-    const dto = { ...this.form.value, variants: [], categoryId: this.form.value.categoryId || null };
+    const ids = (this.form.value.categoryIds ?? []) as string[];
+    const dto = { ...this.form.value, variants: [], categoryIds: ids, categoryId: ids[0] ?? null };
 
     const req$ = this.isEdit() && this.productId
       ? this.productService.update(this.productId, dto)
@@ -775,9 +818,12 @@ export class AdminProductFormComponent implements OnInit {
           this.router.navigate(['/admin/products']);
         }
       },
-      error: () => {
+      error: (e) => {
         this.saving.set(false);
-        this.toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save product. Please check all required fields.', life: 4000 });
+        // say what the server did not accept (e.g. "'Price' must be greater than '0'")
+        const fields = e?.error?.errors;
+        const first = fields ? (Object.values(fields).flat() as string[]).filter(Boolean).join(' ') : (e?.error?.message ?? '');
+        this.toast.add({ severity: 'error', summary: 'Error', detail: first || 'Failed to save product. Please check all required fields.', life: 5000 });
       }
     });
   }

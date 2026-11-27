@@ -35,13 +35,15 @@ public class MappingProfile : Profile
             .ForMember(d => d.PrimaryImageUrl, o => o.MapFrom<PrimaryImageUrlResolver>());
 
         CreateMap<Product, ProductDetailDto>()
-            .IncludeBase<Product, ProductListDto>();
+            .IncludeBase<Product, ProductListDto>()
+            .ForMember(d => d.CategoryIds, o => o.MapFrom(s => ProductCategoryRules.AllIds(s)))
+            .ForMember(d => d.CategoryNames, o => o.MapFrom(s => ProductCategoryRules.AllNames(s)));
 
         CreateMap<ProductImage, ProductImageDto>()
             .ForMember(d => d.ImageUrl, o => o.MapFrom<ProductImageUrlResolver>());
         CreateMap<ProductVariant, ProductVariantDto>();
-        CreateMap<CreateProductDto, Product>();
-        CreateMap<UpdateProductDto, Product>();
+        CreateMap<CreateProductDto, Product>().ForMember(d => d.ProductCategories, o => o.Ignore());
+        CreateMap<UpdateProductDto, Product>().ForMember(d => d.ProductCategories, o => o.Ignore());
         CreateMap<CreateProductVariantDto, ProductVariant>();
 
         // Order
